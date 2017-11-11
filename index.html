@@ -42,12 +42,15 @@
             #answers-container {
                 display: flex;
                 justify-content: space-between;
-                font-size: 15vw;
                 user-select: none;
             }
 
             #answers-container a {
                 text-decoration: none;
+            }
+
+            #answers-container img {
+                width: 13vw;
             }
 
             #question-indicator-container {
@@ -79,7 +82,7 @@
             footer {
                 padding: 1.5rem;
                 text-align: center;
-                font-size: 0.6rem;
+                font-size: 0.8rem;
             }
 
             footer a {
@@ -109,10 +112,6 @@
                 #question-container h1 {
                     font-size: 10vw;
                 }
-
-                #answers-container {
-                    font-size: 14vh;
-                }
             }
 
             @media (min-width: 768px) {
@@ -127,10 +126,6 @@
                 #question-container h1 {
                     font-size: 7vw;
                 }
-
-                #answers-container {
-                    font-size: 14vh;
-                }
             }
 
             @media (min-width: 992px) {
@@ -140,10 +135,6 @@
 
                 #question-container h1 {
                     font-size: 5vw;
-                }
-
-                #answers-container {
-                    font-size: 18vh;
                 }
             }
 
@@ -155,10 +146,6 @@
                 #question-container h1 {
                     font-size: 4vw;
                 }
-
-                #answers-container {
-                    font-size: min(20vh, 256px);
-                }
             }
         </style>
     </head>
@@ -168,10 +155,11 @@
                 <div id="question-container">
                     <h1>What did you think of the cheesecake?</h1>
                     <div id="answers-container">
-                        <a href="#" alt="Vote for 🤢"><span>🤢</span></a>
-                        <a href="#" alt="Vote for 🙁"><span>🙁</span></a>
-                        <a href="#" alt="Vote for 😋"><span>😋</span></a>
-                        <a href="#" alt="Vote for 🤤"><span>🤤</span></a>
+                        <a href="#" alt="Vote for 🤢"><img src="https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f922.svg" /></a>
+                        <a href="#" alt="Vote for 🙁"><img src="https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f641.svg" /></a>
+                        <a href="#" alt="Vote for 😕"><img src="https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f615.svg" /></a>
+                        <a href="#" alt="Vote for 😋"><img src="https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f60b.svg" /></a>
+                        <a href="#" alt="Vote for 🤤"><img src="https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f924.svg" /></a>
                     </div>
                 </div>
                 <nav id="question-indicator-container">
