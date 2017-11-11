@@ -1,0 +1,45 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        // Core rules
+        "indent": [true, "spaces", 2],
+        "quotemark": [true, "single", "jsx-double"],
+        "no-empty-interface": false,
+        "interface-over-type-literal": false,
+        "interface-name": [true, "never-prefix"],
+        "object-literal-sort-keys": false,
+        "member-ordering": [
+            true,
+            {
+                "order": [
+                    "static-field",
+                    "instance-field",
+                    "constructor",
+                    "public-instance-method",
+                    "protected-instance-method",
+                    "private-instance-method"
+                ]
+            }
+        ],
+        "arrow-parens": true,
+        "max-line-length": [
+            false
+        ],
+        "no-console": [
+            false
+        ],
+        "semicolon": [true, "always", "ignore-interfaces", "ignore-bound-class-methods"],
+        "no-namespace": false,
+        // tslint-misc-rules
+        "prefer-es6-imports": true,
+        "prefer-or-operator-over-ternary": true,
+        "camel-case-local-functions": true
+    },
+    "rulesDirectory": [
+        "./node_modules/tslint-misc-rules/rules"
+    ]
+}
