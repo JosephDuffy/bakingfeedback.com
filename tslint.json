@@ -25,7 +25,7 @@
                 ]
             }
         ],
-        "arrow-parens": true,
+        "arrow-parens": [true, "ban-single-arg-parens"],
         "max-line-length": [
             false
         ],
