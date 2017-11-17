@@ -28,30 +28,16 @@
   width: 13vw;
 }
 
-#question-indicator-container {
+#question-indicators-container {
   display: flex;
   justify-content: space-between;
   width: 60%;
   margin-top: 6vh;
 }
 
-#question-indicator-container > * {
+#question-indicators-container > * {
   flex: 1;
   margin: 0 1vw;
-}
-
-#question-indicator-container .answer-indicator {
-  display: flex;
-  margin-top: 6px;
-  margin-bottom: 6px;
-  height: 1pt;
-  opacity: 0.6;
-  background-color: white;
-}
-
-#question-indicator-container .current-answer {
-  opacity: initial;
-  cursor: initial;
 }
 
 @media (min-width: 576px) {

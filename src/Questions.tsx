@@ -1,6 +1,8 @@
 import * as React from 'react';
 import './Questions.css';
 
+import QuestionIndicator from './QuestionIndicator';
+
 class Questions extends React.Component {
   public render() {
     return (
@@ -15,10 +17,10 @@ class Questions extends React.Component {
               <a href="#" title="Vote for 🤤"><img src="https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f924.svg" /></a>
           </div>
         </div>
-        <nav id="question-indicator-container">
-          <span className="answer-indicator current-answer"></span>
-          <a href="#" title="Open question 2"><span className="answer-indicator"></span></a>
-          <a href="#" title="Open question 3"><span className="answer-indicator"></span></a>
+        <nav id="question-indicators-container">
+          <QuestionIndicator text="Question 1" state="current"/>
+          <QuestionIndicator text="Question 2" state="locked"/>
+          <QuestionIndicator text="Question 3" state="locked"/>
         </nav>
       </div>
     );
