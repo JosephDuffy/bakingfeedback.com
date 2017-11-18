@@ -1,39 +1,24 @@
-html, body {
+html, body, #root {
   height: 100%;
 }
 
 body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+#root {
+  flex: 1;
   display: flex;
   flex-direction: column;
-
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  align-items: center;
 }
 
 main {
   flex: 1 0 auto;
+  width: 90%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-}
-
-#root {
-  width: 90%;
-}
-
-footer {
-  padding: 1.5rem;
-  text-align: center;
-  font-size: 0.8rem;
-}
-
-footer a {
-  color: inherit;
-  text-decoration: inherit;
-}
-
-footer a:hover {
-  text-decoration: underline;
 }
 
 .green-theme {
@@ -47,29 +32,25 @@ footer a:hover {
 }
 
 @media (min-width: 576px) {
-  #root {
+  main {
       width: 90%;
   }
 }
 
 @media (min-width: 768px) {
-  #root {
+  main {
       width: 80%
-  }
-
-  footer {
-      font-size: 0.7rem;
   }
 }
 
 @media (min-width: 992px) {
-  #root {
+  main {
       width: 70%;
   }
 }
 
 @media (min-width: 1200px) {
-  #root {
+  main {
       width: 60%;
   }
 }

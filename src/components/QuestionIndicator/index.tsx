@@ -1,12 +1,14 @@
 import * as React from 'react';
 
-import './QuestionIndicator.css';
+import './index.css';
 
 namespace QuestionIndicator {
   export interface Props {
       text: string;
-      state: 'locked' | 'current' | 'complete';
+      style: Style;
   }
+
+  export type Style = 'locked' | 'current' | 'complete';
 
   export interface State {
     transitionState: TransitionState;
@@ -26,7 +28,7 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
   }
 
   public componentDidMount() {
-    if (this.props.state === 'current') {
+    if (this.props.style === 'current') {
       setTimeout(() => {
         this.showText(true);
       }, 500);
@@ -36,7 +38,7 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
   public render() {
     return (
       <div
-        className={`question-indicator-container ${this.props.state}-question`}
+        className={`question-indicator-container ${this.props.style}-question`}
         onMouseOver={() => this.showText(false)}
         onMouseLeave={() => this.hideText()}
       >

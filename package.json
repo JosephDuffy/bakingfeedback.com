@@ -3,9 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "localforage": "^1.5.3",
     "react": "^16.1.0",
     "react-dom": "^16.1.0",
-    "react-scripts-ts": "2.8.0"
+    "react-redux": "^5.0.6",
+    "react-router": "^4.2.0",
+    "react-router-dom": "^4.2.2",
+    "react-scripts-ts": "2.8.0",
+    "redux": "^3.7.2",
+    "redux-devtools-extension": "^2.13.2",
+    "redux-persist": "^5.4.0",
+    "redux-thunk": "^2.2.0",
+    "typescript-fsa-reducers": "^0.4.4",
+    "typescript-fsa-redux-thunk": "^1.0.0"
   },
   "scripts": {
     "start": "react-scripts-ts start",
@@ -14,10 +24,15 @@
     "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
+    "@types/history": "^4.6.2",
     "@types/jest": "^21.1.6",
     "@types/node": "^8.0.51",
     "@types/react": "^16.0.22",
     "@types/react-dom": "^16.0.3",
+    "@types/react-redux": "^5.0.13",
+    "@types/react-router": "^4.0.17",
+    "@types/react-router-dom": "^4.2.1",
+    "@types/webpack-env": "^1.13.2",
     "tslint-misc-rules": "^3.2.1"
   }
 }
