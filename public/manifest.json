@@ -1,5 +1,6 @@
 {
     "name": "Baking Votes",
+    "short_name": "Baking Votes",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
