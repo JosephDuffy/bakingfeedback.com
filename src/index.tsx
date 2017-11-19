@@ -6,9 +6,11 @@ import { Router, Switch } from 'react-router';
 import { Route } from 'react-router-dom';
 import { PersistGate } from 'redux-persist/lib/integration/react';
 
+import 'normalize.css';
+import './global.css';
+
 import Footer from './components/Footer';
 import Survey from './components/Survey';
-import './global.css';
 
 import registerServiceWorker from './registerServiceWorker';
 import { configureStore } from './store';
