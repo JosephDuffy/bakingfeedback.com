@@ -103,6 +103,9 @@ module.exports = {
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web',
+      // Support typescript-fsa-redux-thunk
+      // https://github.com/xdave/typescript-fsa-redux-thunk/issues/3#issuecomment-313826499
+      'typescript-fsa-redux-thunk': 'typescript-fsa-redux-thunk/lib',
     },
     plugins: [
       // Prevents users from importing files from outside of src/ (or node_modules/).
