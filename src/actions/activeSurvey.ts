@@ -4,6 +4,12 @@ import { bindThunkAction } from 'typescript-fsa-redux-thunk';
 import Question from '../interfaces/Question';
 import Survey from '../interfaces/Survey';
 
+import confusedFace from '../assets/confused-face.svg';
+import droolingFace from '../assets/drooling-face.svg';
+import faceSavouringFood from '../assets/face-savouring-food.svg';
+import nauseatedFace from '../assets/nauseated-face.svg';
+import slightlyFrowningFace from '../assets/slightly-frowning-face.svg';
+
 const actionCreator = actionCreatorFactory();
 
 export const selectQuestion = actionCreator<number>('SELECT_QUESTION');
@@ -30,31 +36,31 @@ export const loadSurveyWorker = bindThunkAction(loadSurvey, async (options, disp
             images: [
               {
                 id: '1',
-                url: 'https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f922.svg',
+                url: nauseatedFace,
                 title: 'Vote for "really disliked it"',
                 alt: 'nauseated face emoji',
               },
               {
                 id: '2',
-                url: 'https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f641.svg',
+                url: slightlyFrowningFace,
                 title: 'Vote for "disliked it"',
                 alt: 'slightly frowning face emoji',
               },
               {
                 id: '3',
-                url: 'https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f615.svg',
+                url: confusedFace,
                 title: 'Vote for "neither liked it nor disliked it"',
                 alt: 'confused face emoji',
               },
               {
                 id: '4',
-                url: 'https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f60b.svg',
+                url: faceSavouringFood,
                 title: 'Vote for "liked it"',
-                alt: 'face savoring food emoji',
+                alt: 'face savouring food emoji',
               },
               {
                 id: '5',
-                url: 'https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/svg/1f924.svg',
+                url: droolingFace,
                 title: 'Vote for "really liked it"',
                 alt: 'drooling face emoji',
               },
