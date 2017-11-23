@@ -4,8 +4,9 @@ import './index.css';
 
 namespace QuestionIndicator {
   export interface Props {
-      text: string;
-      style: Style;
+    text: string;
+    style: Style;
+    onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
   }
 
   export type Style = 'locked' | 'current' | 'complete';
@@ -35,12 +36,19 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
     }
   }
 
+  public componentWillReceiveProps(nextProps: QuestionIndicator.Props) {
+    if (nextProps.style === 'current') {
+      this.showText(true);
+    }
+  }
+
   public render() {
     return (
       <div
         className={`question-indicator-container ${this.props.style}-question`}
         onMouseOver={() => this.showText(false)}
         onMouseLeave={() => this.hideText()}
+        onClick={this.props.onClick}
       >
         <span className="question-indicator"></span>
         <div className="question-indicator-text-container">

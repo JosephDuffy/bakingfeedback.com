@@ -15,10 +15,11 @@ const actionCreator = actionCreatorFactory();
 export const selectQuestion = actionCreator<number>('SELECT_QUESTION');
 
 export type AnswerQuestionPlayload = {
-  questionNumber: number;
+  questionIndex: number;
+  answerIndex: number;
   answer: string;
 };
-export const answerQuestion = actionCreator<AnswerQuestionPlayload>('ANSWER_QUESTION');
+export const updateQuestionAnswer = actionCreator<AnswerQuestionPlayload>('UPDATE_QUESTION_ANSWER');
 
 export const loadSurvey = actionCreator.async<{}, Survey>('LOAD_SURVEY');
 
@@ -30,43 +31,45 @@ export const loadSurveyWorker = bindThunkAction(loadSurvey, async (options, disp
     questions: [
       {
         title: 'What did you think of the cheesecake?',
-        input: {
-          type: Question.InputType.Images,
-          options: {
-            images: [
-              {
-                id: '1',
-                url: nauseatedFace,
-                title: 'Vote for "really disliked it"',
-                alt: 'nauseated face emoji',
-              },
-              {
-                id: '2',
-                url: slightlyFrowningFace,
-                title: 'Vote for "disliked it"',
-                alt: 'slightly frowning face emoji',
-              },
-              {
-                id: '3',
-                url: confusedFace,
-                title: 'Vote for "neither liked it nor disliked it"',
-                alt: 'confused face emoji',
-              },
-              {
-                id: '4',
-                url: faceSavouringFood,
-                title: 'Vote for "liked it"',
-                alt: 'face savouring food emoji',
-              },
-              {
-                id: '5',
-                url: droolingFace,
-                title: 'Vote for "really liked it"',
-                alt: 'drooling face emoji',
-              },
-            ],
+        inputs: [
+          {
+            type: Question.InputType.Images,
+            options: {
+              images: [
+                {
+                  id: '1',
+                  url: nauseatedFace,
+                  title: 'Vote for "really disliked it"',
+                  alt: 'nauseated face emoji',
+                },
+                {
+                  id: '2',
+                  url: slightlyFrowningFace,
+                  title: 'Vote for "disliked it"',
+                  alt: 'slightly frowning face emoji',
+                },
+                {
+                  id: '3',
+                  url: confusedFace,
+                  title: 'Vote for "neither liked it nor disliked it"',
+                  alt: 'confused face emoji',
+                },
+                {
+                  id: '4',
+                  url: faceSavouringFood,
+                  title: 'Vote for "liked it"',
+                  alt: 'face savouring food emoji',
+                },
+                {
+                  id: '5',
+                  url: droolingFace,
+                  title: 'Vote for "really liked it"',
+                  alt: 'drooling face emoji',
+                },
+              ],
+            },
           },
-        },
+        ],
       },
     ],
   } as Survey;

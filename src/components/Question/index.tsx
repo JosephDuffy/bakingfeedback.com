@@ -3,136 +3,176 @@ import './index.css';
 
 import { default as QuestionInterface } from '../../interfaces/Question';
 
+import ImageQuestionInput from '../ImageQuestionInput';
+import TextQuestionInput from '../TextQuestionInput';
+
 namespace Question {
   export interface Props {
     question: QuestionInterface;
+    answers: string[];
 
-    onAnswerChosen: (answer: string) => void;
+    onAnswerUpdated: (index: number, answer: string) => void;
+    onSubmit: () => void;
   }
 
   export interface State {
-    answer: string;
-    errors: string[];
+    errors: string[][];
+    tryingSubmit: boolean;
+  }
+
+  export interface Error {
+    answerIndex: number;
+    text: string;
   }
 }
 
 class Question extends React.Component<Question.Props, Question.State> {
 
+  private get allErrors(): Question.Error[] {
+    return new Array().concat(...this.state.errors);
+  }
+
   constructor(props: Question.Props) {
     super(props);
 
     this.state = {
-      answer: '',
-      errors: [],
+      errors: new Array(props.question.inputs.length),
+      tryingSubmit: false,
     };
   }
 
-  public render() {
-    switch (this.props.question.input.type) {
-      case QuestionInterface.InputType.Images:
-        return this.renderEmojiQuestions(this.props.question.input.options as QuestionInterface.ImagesOptions);
-      case QuestionInterface.InputType.TextField:
-        return this.renderTextField(this.props.question.input.options as QuestionInterface.TextFieldOptions);
-      default:
-        return (
-          <div>Unsupported question</div>
-        );
-    }
-  }
-
-  /**
-   * Updates the answer to the question, optionally validating and submitting the answer.
-   *
-   * @param answer The new answer
-   * @param action An optional action to perform. If 'validate', passed value will be
-   *               validates (this is the default if there are errors). If 'submit' the
-   *               passed value will first be validated, and if it passes, `onAnswerChosen`
-   *               will be called after a render of the form has been completed.
-   */
-  private updateAnswer(answer: string, action?: 'validate' | 'submit') {
-    const performValidation = action !== undefined || this.state.errors.length > 0;
-
-    if (performValidation) {
-      this.validateAnswer(answer, action === 'submit');
-    } else {
+  public componentWillReceiveProps(nextProps: Question.Props) {
+    if (this.props.question !== nextProps.question) {
       this.setState({
-        answer,
+        errors: new Array(nextProps.question.inputs.length),
       });
     }
   }
 
-  private validateAnswer(answer: string, submitIfValid: boolean) {
+  public render() {
+    const { question } = this.props;
+
+    const inputs = question.inputs.map((input, index) => {
+      const answer = this.props.answers[index];
+
+      // TODO: Render errors
+
+      switch (input.type) {
+        case QuestionInterface.InputType.Images:
+          return (
+            <ImageQuestionInput answer={answer} key={index} options={input.options as QuestionInterface.ImagesOptions} updateAnswer={this.handleAnswerUpdated.bind(this, index)} trySubmit={this.trySubmit} />
+          );
+        case QuestionInterface.InputType.Text:
+          return (
+            <TextQuestionInput answer={answer} key={index} options={input.options as QuestionInterface.TextOptions} updateAnswer={this.handleAnswerUpdated.bind(this, index)} trySubmit={this.trySubmit} />
+          );
+      }
+    });
+
+    const renderSubmitButton = question.inputs.length > 1 || question.inputs[0].type !== QuestionInterface.InputType.Images;
+
+    return (
+      <div className="question-container">
+        {question.title &&
+          <h1>{question.title}</h1>
+        }
+        {inputs}
+        {renderSubmitButton &&
+          <button
+            onClick={() => this.trySubmit()}
+          >
+            Submit
+          </button>
+        }
+      </div>
+    );
+  }
+
+  private handleAnswerUpdated(index: number, answer: string, validate: boolean, trySubmit: boolean = false) {
+    this.props.onAnswerUpdated(index, answer);
+
+    if (trySubmit) {
+      this.trySubmit();
+      return;
+    }
+
+    const performValidation = validate || this.state.errors[index].length > 0;
+
+    if (performValidation) {
+      const errors = this.validateAnswer(index, answer);
+
+      this.setState({
+        errors: {
+          ...this.state.errors,
+          [index]: errors,
+        },
+      });
+    }
+  }
+
+  private validateAnswer(answerIndex: number, answer: string): string[] {
+    const input = this.props.question.inputs[answerIndex];
     const errors: string[] = [];
 
-    switch (this.props.question.input.type) {
+    switch (input.type) {
       case QuestionInterface.InputType.Images:
+        if (answer === '') {
+          errors.push('An answer is required');
+        }
         break;
-      case QuestionInterface.InputType.TextField:
-        const options = this.props.question.input.options as QuestionInterface.TextFieldOptions;
+      case QuestionInterface.InputType.Text:
+        const options = input.options as QuestionInterface.TextOptions;
 
         if (options.minimumCharacters && answer.length < options.minimumCharacters) {
           const suffix = options.minimumCharacters === 1 ? ' long' : '\'s long';
           errors.push(`Answer must be at least ${options.minimumCharacters} character${suffix}`);
         }
-      default:
-        break;
+
+        // TODO: Validate other rules
     }
 
+    return errors;
+  }
+
+  private validateAllAnswers(): string[][] {
+    const { answers } = this.props;
+    const errors: string[][] = [];
+
+    // `Array.from` is a hack: https://github.com/Microsoft/TypeScript/issues/11209#issuecomment-303152976
+    for (const index of Array.from(answers.keys())) {
+      const answer = answers[index];
+      errors[index] = this.validateAnswer(index, answer);
+    }
+
+    return errors;
+  }
+
+  private trySubmit() {
+    const errors = this.validateAllAnswers();
+
     this.setState({
-      answer,
       errors,
-    }, () => {
-      if (errors.length === 0 && submitIfValid) {
-        this.props.onAnswerChosen(answer);
-      }
     });
+
+    if (errors.length === 0) {
+      this.props.onSubmit();
+    }
   }
 
-  private validateCurrentAnswer(submitIfValid: boolean) {
-    this.validateAnswer(this.state.answer, submitIfValid);
-  }
+  // private renderTextField(options: QuestionInterface.TextFieldOptions, index: number) {
+  //   const { placeholder, maximumCharacters, minimumCharacters } = options;
 
-  private renderEmojiQuestions(options: QuestionInterface.ImagesOptions) {
-    const { images } = options;
-
-    const elements = images.map((image, index) => (
-      <img
-        key={index}
-        src={image.url}
-        title={image.title}
-        aria-label={image.title}
-        alt={image.alt}
-        role="button"
-        onClick={() => this.updateAnswer(image.id, 'submit')}
-      />
-    ));
-
-    return (
-      <div className="emoji-container">
-        {elements}
-      </div>
-    );
-  }
-
-  private renderTextField(options: QuestionInterface.TextFieldOptions) {
-    const { placeholder, maximumCharacters, minimumCharacters } = options;
-
-    return (
-      <div className="text-field-container">
-        <textarea
-          placeholder={placeholder}
-          maxLength={maximumCharacters}
-          required={(minimumCharacters || -1) > 0}
-          onChange={event => this.updateAnswer(event.target.value, 'validate')}
-        />
-        <button
-          onClick={() => this.validateCurrentAnswer(true)}
-        >
-          Submit
-        </button>
-      </div>
-    );
-  }
+  //   return (
+  //     <div className="text-field-container">
+  //       <textarea
+  //         placeholder={placeholder}
+  //         maxLength={maximumCharacters}
+  //         required={(minimumCharacters || -1) > 0}
+  //         onChange={event => this.handleAnswerUpdated(index, event.target.value, true)}
+  //       />
+  //     </div>
+  //   );
+  // }
 }
 
 export default Question;

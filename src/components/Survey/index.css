@@ -4,13 +4,9 @@
   align-items: center;
 }
 
-#question-container {
-  text-align: center;
-}
-
 #question-container h1 {
-  margin-bottom: 5rem;
   font-size: 12vw;
+  text-align: center;
 }
 
 #answers-container {

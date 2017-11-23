@@ -1,9 +1,13 @@
 
 namespace Question {
+  export interface Input {
+    readonly type: InputType;
+    readonly options: Options;
+  }
+
   export enum InputType {
     Images,
-    TextField,
-    TextBox,
+    Text,
   }
 
   export interface ImagesOptions {
@@ -20,25 +24,25 @@ namespace Question {
     }>;
   }
 
-  export interface TextFieldOptions {
+  export interface TextOptions {
+    readonly label: string;
+    readonly allowMultipleLines: boolean;
     readonly placeholder?: string;
+    readonly hint?: string;
     readonly minimumCharacters?: number;
     readonly maximumCharacters?: number;
   }
 
-  export interface TextBoxOptions extends TextFieldOptions {}
+  export type Options = ImagesOptions | TextOptions;
 }
 
 interface Question {
 
   readonly id: string;
 
-  readonly title: string;
+  readonly title?: string;
 
-  readonly input: {
-    readonly type: Question.InputType;
-    readonly options: Question.ImagesOptions | Question.TextFieldOptions | Question.TextBoxOptions;
-  }
+  readonly inputs: Question.Input[];
 
 }
 

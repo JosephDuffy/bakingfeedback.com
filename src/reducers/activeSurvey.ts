@@ -1,27 +1,32 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { answerQuestion, loadSurvey, selectQuestion } from '../actions/activeSurvey';
+import { loadSurvey, selectQuestion, updateQuestionAnswer } from '../actions/activeSurvey';
 import Survey from '../interfaces/Survey';
 
 export type State = {
-  currentQuestion: number,
+  currentQuestionIndex: number,
   survey?: Survey,
-  answers: string[],
+  answers: string[][],
 };
 
 const initialState = {
-  currentQuestion: 0,
+  currentQuestionIndex: 0,
   answers: [],
 };
 
 const reducer = reducerWithInitialState<State>(initialState)
   .case(selectQuestion, (state, newQuestion) => ({
     ...state,
-    currentQuestion: newQuestion,
+    currentQuestionIndex: newQuestion,
   }))
-  .case(answerQuestion, (state, payload) => {
+  .case(updateQuestionAnswer, (state, { questionIndex, answerIndex, answer }) => {
     const answers = state.answers;
-    answers[payload.questionNumber] = payload.answer;
+
+    if (answers[questionIndex] === undefined) {
+      answers[questionIndex] = [];
+    }
+
+    answers[questionIndex][answerIndex] = answer;
 
     return {
       ...state,
@@ -30,8 +35,9 @@ const reducer = reducerWithInitialState<State>(initialState)
   })
   .case(loadSurvey.done, (state, { result: survey }) => ({
     ...state,
-    currentQuestion: 0,
+    currentQuestionIndex: 0,
     survey,
+    answers: [],
   }))
   .build();
 
