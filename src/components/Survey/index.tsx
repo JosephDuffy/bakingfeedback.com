@@ -126,7 +126,7 @@ export class Survey extends React.Component<Readonly<Survey.Props>, Readonly<Sur
     this.props.updateQuestionAnswer(questionIndex, answerIndex, answer);
   }
 
-  private onSubmit() {
+  private onSubmit = () => {
     if (this.isOnSubmit) {
       // TODO: Submit
     } else {
