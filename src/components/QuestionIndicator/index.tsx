@@ -15,10 +15,18 @@ namespace QuestionIndicator {
     transitionState: TransitionState;
   }
 
-  export type TransitionState = 'animating-in' | 'showing' | 'animating-out' | 'hidden';
+  export type AnimationTransitionState = 'animating-in' | 'animating-out';
+
+  export type FinalTransitionState = 'showing' | 'hidden';
+
+  export type TransitionState = AnimationTransitionState | FinalTransitionState;
 }
 
 class QuestionIndicator extends React.Component<QuestionIndicator.Props, QuestionIndicator.State> {
+
+  private get animationTransitionLength() {
+    return 450;
+  }
 
   constructor(props: QuestionIndicator.Props) {
     super(props);
@@ -30,24 +38,26 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
 
   public componentDidMount() {
     if (this.props.style === 'current') {
-      setTimeout(() => {
-        this.showText(true);
-      }, 500);
+      this.showText(500);
     }
   }
 
   public componentWillReceiveProps(nextProps: QuestionIndicator.Props) {
     if (nextProps.style === 'current') {
-      this.showText(true);
+      this.showText();
+    } else if (this.state.transitionState === 'showing') {
+      this.hideText();
     }
   }
 
   public render() {
+    const isCurrent = this.props.style === 'current';
+
     return (
       <div
         className={`question-indicator-container ${this.props.style}-question`}
-        onMouseOver={() => this.showText(false)}
-        onMouseLeave={() => this.hideText()}
+        onMouseOver={!isCurrent ? () => this.showText() : undefined}
+        onMouseLeave={!isCurrent ? () => this.hideText() : undefined}
         onClick={this.props.onClick}
       >
         <span className="question-indicator"></span>
@@ -60,53 +70,63 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
     );
   }
 
-  private updateTransitionState(toState: QuestionIndicator.TransitionState, after: number, callback?: (() => void)) {
-    setTimeout(() => {
-      this.setState({
-        transitionState: toState,
-      }, callback);
-    }, after);
+  private showText(delay: number = 0) {
+    this.performAnimation('showing', delay);
   }
 
-  private showText(hideAutomatically: boolean) {
-    if (this.state.transitionState !== 'hidden') {
+  private hideText(delay: number = 0) {
+    this.performAnimation('hidden', delay);
+  }
+
+  private performAnimation(finalState: QuestionIndicator.FinalTransitionState, delay: number) {
+    if (delay > 0) {
+      setTimeout(this.performAnimation.bind(this, finalState, 0), delay);
+      return;
+    }
+
+    const {
+      stateToWaitFor,
+      requiredState,
+      animationState,
+    } = (() => {
+      switch (finalState) {
+      case 'showing':
+        return {
+          stateToWaitFor: 'animating-out' as QuestionIndicator.AnimationTransitionState,
+          requiredState: 'hidden' as QuestionIndicator.FinalTransitionState,
+          animationState: 'animating-in' as QuestionIndicator.AnimationTransitionState,
+        };
+      case 'hidden':
+        return {
+          stateToWaitFor: 'animating-in' as QuestionIndicator.AnimationTransitionState,
+          requiredState: 'showing' as QuestionIndicator.FinalTransitionState,
+          animationState: 'animating-out' as QuestionIndicator.AnimationTransitionState,
+        };
+      }
+    })();
+
+    const currentTransitionState = this.state.transitionState;
+
+    if (currentTransitionState === stateToWaitFor) {
+      // Asking to show/hide but there's an active hiding/showing animation
+      setTimeout(this.performAnimation.bind(this, finalState, delay), this.animationTransitionLength);
+      return;
+    }
+
+    if (currentTransitionState !== requiredState) {
+      // No need to change state when it's already in that state or animating
       return;
     }
 
     this.setState({
-      transitionState: 'animating-in',
+      transitionState: animationState,
     }, () => {
-      this.performTransitionToNextAnimationState(hideAutomatically, true);
+      setTimeout(() => {
+        this.setState({
+          transitionState: finalState,
+        });
+      }, this.animationTransitionLength);
     });
-  }
-
-  private hideText() {
-    if (this.state.transitionState === 'animating-in') {
-      setTimeout(this.hideText.bind(this), 450);
-      return;
-    }
-
-    if (this.state.transitionState !== 'showing') {
-      return;
-    }
-
-    this.performTransitionToNextAnimationState(false, false);
-  }
-
-  private performTransitionToNextAnimationState(hideAutomatically: boolean, delay: boolean) {
-    switch (this.state.transitionState) {
-      case 'animating-in':
-        this.updateTransitionState('showing', delay ? 450 : 0, hideAutomatically ? this.performTransitionToNextAnimationState.bind(this, hideAutomatically, delay) : undefined);
-        break;
-      case 'showing':
-        this.updateTransitionState('animating-out', delay ? 2000 : 0, this.performTransitionToNextAnimationState.bind(this, hideAutomatically, true));
-        break;
-      case 'animating-out':
-        this.updateTransitionState('hidden', delay ? 450 : 0);
-        break;
-      case 'hidden':
-        break;
-    }
   }
 }
 
