@@ -60,7 +60,7 @@ export class Survey extends React.Component<Readonly<Survey.Props>, Readonly<Sur
       if (this.isOnSubmit) {
         const submitQuestion: QuestionInterface = {
           id: 'submit',
-          title: 'Submit',
+          title: 'About You',
           inputs: [
             {
               type: QuestionInterface.InputType.Text,
@@ -113,7 +113,7 @@ export class Survey extends React.Component<Readonly<Survey.Props>, Readonly<Sur
         <nav id="question-indicators-container">
           {this.questionIndicators()}
           <QuestionIndicator
-            text="Submit"
+            text="About You"
             style={this.isOnSubmit ? 'current' : enableSubmit ? 'complete' : 'locked'}
             onClick={enableSubmit && !this.isOnSubmit ? this.props.selectQuestion.bind(this, numberOfQuestions) : undefined}
           />
