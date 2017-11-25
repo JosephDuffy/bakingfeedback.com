@@ -28,10 +28,6 @@ namespace Question {
 
 class Question extends React.Component<Question.Props, Question.State> {
 
-  private get allErrors(): Question.Error[] {
-    return new Array().concat(...this.state.errors);
-  }
-
   constructor(props: Question.Props) {
     super(props);
 
@@ -60,11 +56,11 @@ class Question extends React.Component<Question.Props, Question.State> {
       switch (input.type) {
         case QuestionInterface.InputType.Images:
           return (
-            <ImageQuestionInput answer={answer} key={index} options={input.options as QuestionInterface.ImagesOptions} updateAnswer={this.handleAnswerUpdated.bind(this, index)} trySubmit={this.trySubmit} />
+            <ImageQuestionInput answer={answer} key={index} options={input.options as QuestionInterface.ImagesOptions} updateAnswer={this.handleAnswerUpdated.bind(this, index)} trySubmit={this.trySubmit.bind(this)} />
           );
         case QuestionInterface.InputType.Text:
           return (
-            <TextQuestionInput answer={answer} key={index} options={input.options as QuestionInterface.TextOptions} updateAnswer={this.handleAnswerUpdated.bind(this, index)} trySubmit={this.trySubmit} />
+            <TextQuestionInput answer={answer} key={index} options={input.options as QuestionInterface.TextOptions} updateAnswer={this.handleAnswerUpdated.bind(this, index)} trySubmit={this.trySubmit.bind(this)} />
           );
       }
     });
@@ -137,15 +133,18 @@ class Question extends React.Component<Question.Props, Question.State> {
 
   private validateAllAnswers(): string[][] {
     const { answers } = this.props;
-    const errors: string[][] = [];
+    const allErrors: string[][] = [];
 
     // `Array.from` is a hack: https://github.com/Microsoft/TypeScript/issues/11209#issuecomment-303152976
     for (const index of Array.from(answers.keys())) {
       const answer = answers[index];
-      errors[index] = this.validateAnswer(index, answer);
+      const errors = this.validateAnswer(index, answer);
+      if (errors.length > 0) {
+        allErrors[index] = errors;
+      }
     }
 
-    return errors;
+    return allErrors;
   }
 
   private trySubmit() {
@@ -159,21 +158,6 @@ class Question extends React.Component<Question.Props, Question.State> {
       this.props.onSubmit();
     }
   }
-
-  // private renderTextField(options: QuestionInterface.TextFieldOptions, index: number) {
-  //   const { placeholder, maximumCharacters, minimumCharacters } = options;
-
-  //   return (
-  //     <div className="text-field-container">
-  //       <textarea
-  //         placeholder={placeholder}
-  //         maxLength={maximumCharacters}
-  //         required={(minimumCharacters || -1) > 0}
-  //         onChange={event => this.handleAnswerUpdated(index, event.target.value, true)}
-  //       />
-  //     </div>
-  //   );
-  // }
 }
 
 export default Question;
