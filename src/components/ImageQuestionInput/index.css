@@ -1,0 +1,30 @@
+.image-question-input-container {
+  display: flex;
+  justify-content: space-between;
+  user-select: none;
+  border-radius: 50%;
+}
+
+.image-question-input-container label {
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(26, 26, 26, 0.301961);
+}
+
+.image-question-input-container label:hover, .image-question-input-container label:active {
+  background-color: rgba(255, 255, 255, 0.45);
+}
+
+.image-question-input-container .chosen-answer {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.image-question-input-container input[type="radio"] {
+  display: none;
+}
+
+.image-question-input-container img {
+  padding: 4px;
+  width: 100%;
+  -webkit-touch-callout: none;
+  user-select: none;
+}

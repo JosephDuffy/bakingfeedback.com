@@ -16,15 +16,3 @@
   border-radius: .25rem;
   transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
-
-.emoji-container {
-  display: flex;
-  justify-content: space-between;
-  user-select: none;
-}
-
-.emoji-container img {
-  width: 13vw;
-  height: 13vw;
-  cursor: pointer;
-}

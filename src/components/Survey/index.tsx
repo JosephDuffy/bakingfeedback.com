@@ -113,7 +113,7 @@ export class Survey extends React.Component<Readonly<Survey.Props>, Readonly<Sur
         <nav id="question-indicators-container">
           {this.questionIndicators()}
           <QuestionIndicator
-            text="About You"
+            text={`Question ${numberOfQuestions + 1}`}
             style={this.isOnSubmit ? 'current' : enableSubmit ? 'complete' : 'locked'}
             onClick={enableSubmit && !this.isOnSubmit ? this.props.selectQuestion.bind(this, numberOfQuestions) : undefined}
           />

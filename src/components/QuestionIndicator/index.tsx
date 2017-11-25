@@ -13,6 +13,7 @@ namespace QuestionIndicator {
 
   export interface State {
     transitionState: TransitionState;
+    queuedNextState?: FinalTransitionState;
   }
 
   export type AnimationTransitionState = 'animating-in' | 'animating-out';
@@ -38,7 +39,12 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
 
   public componentDidMount() {
     if (this.props.style === 'current') {
-      this.showText(500);
+      setTimeout(() => {
+        // Guard against the user answering the question within 0.5 seconds
+        if (this.state.transitionState === 'hidden' && this.props.style === 'current') {
+          this.showText();
+        }
+      }, 500);
     }
   }
 
@@ -70,61 +76,55 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
     );
   }
 
-  private showText(delay: number = 0) {
-    this.performAnimation('showing', delay);
+  private showText() {
+    this.performAnimation('showing');
   }
 
-  private hideText(delay: number = 0) {
-    this.performAnimation('hidden', delay);
+  private hideText() {
+    this.performAnimation('hidden');
   }
 
-  private performAnimation(finalState: QuestionIndicator.FinalTransitionState, delay: number) {
-    if (delay > 0) {
-      setTimeout(this.performAnimation.bind(this, finalState, 0), delay);
+  private performAnimation(finalState: QuestionIndicator.FinalTransitionState, currentState: QuestionIndicator.TransitionState = this.state.transitionState) {
+    if (finalState === currentState) {
       return;
     }
 
-    const {
-      stateToWaitFor,
-      requiredState,
-      animationState,
-    } = (() => {
+    if (
+      (finalState === 'hidden' && currentState === 'animating-in') ||
+      (finalState === 'showing' && currentState === 'animating-out')
+      ) {
+        this.setState({
+          queuedNextState: finalState,
+        });
+        return;
+    } else if (
+        (finalState === 'hidden' && currentState === 'animating-out') ||
+        (finalState === 'showing' && currentState === 'animating-in')
+    ) {
+      return;
+    }
+
+    const animationState = (() => {
       switch (finalState) {
       case 'showing':
-        return {
-          stateToWaitFor: 'animating-out' as QuestionIndicator.AnimationTransitionState,
-          requiredState: 'hidden' as QuestionIndicator.FinalTransitionState,
-          animationState: 'animating-in' as QuestionIndicator.AnimationTransitionState,
-        };
+        return 'animating-in' as QuestionIndicator.AnimationTransitionState;
       case 'hidden':
-        return {
-          stateToWaitFor: 'animating-in' as QuestionIndicator.AnimationTransitionState,
-          requiredState: 'showing' as QuestionIndicator.FinalTransitionState,
-          animationState: 'animating-out' as QuestionIndicator.AnimationTransitionState,
-        };
+        return 'animating-out' as QuestionIndicator.AnimationTransitionState;
       }
     })();
 
-    const currentTransitionState = this.state.transitionState;
-
-    if (currentTransitionState === stateToWaitFor) {
-      // Asking to show/hide but there's an active hiding/showing animation
-      setTimeout(this.performAnimation.bind(this, finalState, delay), this.animationTransitionLength);
-      return;
-    }
-
-    if (currentTransitionState !== requiredState) {
-      // No need to change state when it's already in that state or animating
-      return;
-    }
-
     this.setState({
       transitionState: animationState,
+      queuedNextState: undefined,
     }, () => {
       setTimeout(() => {
-        this.setState({
-          transitionState: finalState,
-        });
+        if (this.state.queuedNextState) {
+          this.performAnimation(this.state.queuedNextState, finalState);
+        } else {
+          this.setState({
+            transitionState: finalState,
+          });
+        }
       }, this.animationTransitionLength);
     });
   }

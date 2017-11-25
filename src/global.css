@@ -27,10 +27,6 @@ main {
   color: white;
 }
 
-.green-theme footer {
-  color: rgba(250, 250, 250, 0.8);
-}
-
 @media (min-width: 576px) {
   main {
       width: 90%;

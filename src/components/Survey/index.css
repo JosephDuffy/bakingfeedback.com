@@ -30,7 +30,7 @@
 #question-indicators-container {
   display: flex;
   justify-content: space-between;
-  width: 60%;
+  width: 90%;
   margin-top: 6vh;
 }
 
@@ -42,6 +42,10 @@
 @media (min-width: 576px) {
   #current-question-container h1 {
       font-size: 10vw;
+  }
+
+  #question-indicators-container {
+    width: 80%;
   }
 }
 
@@ -55,10 +59,18 @@
   #current-question-container h1 {
       font-size: 5vw;
   }
+
+  #question-indicators-container {
+    width: 70%;
+  }
 }
 
 @media (min-width: 1200px) {
   #current-question-container h1 {
       font-size: 4vw;
+  }
+
+  #question-indicators-container {
+    width: 60%;
   }
 }
