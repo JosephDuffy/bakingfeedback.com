@@ -29,6 +29,8 @@ ReactDOM.render(
         >
           <Switch>
             <Route path="/" exact={true} component={Survey} />
+            <Route path="/question/" exact={true} component={Survey} />
+            <Route path="/question/:questionNumber" exact={true} component={Survey} />
           </Switch>
         </Router>
       </main>

@@ -1,23 +1,32 @@
 import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
-import { RouteComponentProps } from 'react-router';
+import { Redirect, RouteComponentProps } from 'react-router';
 import { AppState } from '../../reducers';
 import './index.css';
 
-import { loadSurveyWorker, selectQuestion, updateQuestionAnswer } from '../../actions/activeSurvey';
+import { loadSurveyWorker, updateQuestionAnswer } from '../../actions/activeSurvey';
 import { default as QuestionInterface } from '../../interfaces/Question';
 import { default as SurveyInterface } from '../../interfaces/Survey';
 import Question from '../Question';
 import QuestionIndicator from '../QuestionIndicator';
 
 export namespace Survey {
-  export interface Props extends RouteComponentProps<{}> {
-    currentQuestionIndex: number;
-    answers: string[][],
+  export type AllProps = Survey.Props & Survey.DispatchProps & Survey.RouteProps;
+
+  export interface Props {
+    answers: string[][];
     survey?: SurveyInterface;
+  }
+
+  export interface DispatchProps {
     loadSurvey: () => void;
     updateQuestionAnswer: (questionIndex: number, answerIndex: number, answer: string) => void;
-    selectQuestion: (questionNumber: number) => void;
+  }
+
+  export type RouteProps = RouteComponentProps<RouteParameters>;
+
+  export interface RouteParameters {
+    questionNumber?: string;
   }
 
   export interface State {
@@ -26,17 +35,25 @@ export namespace Survey {
   }
 }
 
-export class Survey extends React.Component<Readonly<Survey.Props>, Readonly<Survey.State>> {
+export class Survey extends React.Component<Survey.AllProps, Survey.State> {
+
+  private get currentQuestionIndex() {
+    if (this.props.match.params.questionNumber === undefined) {
+      return -1;
+    }
+
+    return Number.parseInt(this.props.match.params.questionNumber, 10) - 1;
+  }
 
   private get isOnSubmit(): boolean {
-    if (!this.props.survey) {
+    if (!this.props.survey || this.currentQuestionIndex < 0) {
       return false;
     }
 
-    const { currentQuestionIndex, survey } = this.props;
+    const { survey } = this.props;
     const { questions } = survey;
 
-    return currentQuestionIndex >= questions.length;
+    return this.currentQuestionIndex >= questions.length;
   }
 
   public componentWillMount() {
@@ -52,58 +69,65 @@ export class Survey extends React.Component<Readonly<Survey.Props>, Readonly<Sur
       );
     }
 
-    const { currentQuestionIndex, survey } = this.props;
+    const { survey } = this.props;
     const { questions } = survey;
-    const currentQuestionAnswers = this.props.answers[currentQuestionIndex] || [];
+
+    if (this.currentQuestionIndex < 0 || this.currentQuestionIndex > questions.length) {
+      return (
+        <Redirect to={`/question/${1}`} />
+      );
+    }
+
+    const currentQuestionAnswers = this.props.answers[this.currentQuestionIndex] || [];
+
+    const submitQuestion: QuestionInterface = {
+      id: 'submit',
+      title: 'About You',
+      inputs: [
+        {
+          type: QuestionInterface.InputType.Text,
+          options: {
+            label: 'Name',
+            allowMultipleLines: false,
+            minimumCharacters: 2,
+          },
+        },
+        {
+          type: QuestionInterface.InputType.Text,
+          options: {
+            label: 'Email Address',
+            allowMultipleLines: false,
+            hint: 'Will never be shown publicly; may be used in future to enable accounts',
+          },
+        },
+      ],
+    };
 
     const content = (() => {
       if (this.isOnSubmit) {
-        const submitQuestion: QuestionInterface = {
-          id: 'submit',
-          title: 'About You',
-          inputs: [
-            {
-              type: QuestionInterface.InputType.Text,
-              options: {
-                label: 'Name',
-                allowMultipleLines: false,
-                minimumCharacters: 2,
-              },
-            },
-            {
-              type: QuestionInterface.InputType.Text,
-              options: {
-                label: 'Email Address',
-                allowMultipleLines: false,
-                hint: 'Will never be shown publicly; may be used in future to enable accounts',
-              },
-            },
-          ],
-        };
 
         return (
           <Question
             question={submitQuestion}
             answers={currentQuestionAnswers}
-            onAnswerUpdated={this.onAnswerUpdated.bind(this, currentQuestionIndex)}
-            onSubmit={this.onSubmit}
+            onAnswerUpdated={this.onAnswerUpdated.bind(this, this.currentQuestionIndex)}
+            onSubmit={this.handleQuestionSubmit}
           />
         );
       } else {
-        const question = questions[currentQuestionIndex];
+        const question = questions[this.currentQuestionIndex];
         return (
           <Question
             question={question}
             answers={currentQuestionAnswers}
-            onAnswerUpdated={this.onAnswerUpdated.bind(this, currentQuestionIndex)}
-            onSubmit={this.onSubmit}
+            onAnswerUpdated={this.onAnswerUpdated.bind(this, this.currentQuestionIndex)}
+            onSubmit={this.handleQuestionSubmit}
           />
         );
       }
     })();
 
-    const numberOfQuestions = questions.length;
-    const enableSubmit = this.props.answers.length >= questions.length;
+    const allQuestions = survey.questions.concat(submitQuestion);
 
     return (
       <div id="questions-container">
@@ -111,12 +135,7 @@ export class Survey extends React.Component<Readonly<Survey.Props>, Readonly<Sur
           {content}
         </div>
         <nav id="question-indicators-container">
-          {this.questionIndicators()}
-          <QuestionIndicator
-            text={`Question ${numberOfQuestions + 1}`}
-            style={this.isOnSubmit ? 'current' : enableSubmit ? 'complete' : 'locked'}
-            onClick={enableSubmit && !this.isOnSubmit ? this.props.selectQuestion.bind(this, numberOfQuestions) : undefined}
-          />
+          {this.questionIndicators(allQuestions)}
         </nav>
       </div>
     );
@@ -126,27 +145,26 @@ export class Survey extends React.Component<Readonly<Survey.Props>, Readonly<Sur
     this.props.updateQuestionAnswer(questionIndex, answerIndex, answer);
   }
 
-  private onSubmit = () => {
+  private handleQuestionSubmit = () => {
     if (this.isOnSubmit) {
       // TODO: Submit
     } else {
-      this.props.selectQuestion(this.props.currentQuestionIndex + 1);
+      if (this.currentQuestionIndex > -1) {
+        this.changeToQuestion(this.currentQuestionIndex + 2);
+      }
     }
   }
 
-  private questionIndicators() {
-    if (!this.props.survey) {
-      return;
-    }
-
-    return this.props.survey.questions.map((question, index) => {
+  private questionIndicators(allQuestions: QuestionInterface[]) {
+    return allQuestions.map((question, index) => {
+      const questionNumber = index + 1;
       let style: QuestionIndicator.Style;
       let enableClicking: boolean;
 
-      if (this.props.currentQuestionIndex === index) {
+      if (this.currentQuestionIndex === index) {
         style = 'current';
         enableClicking = false;
-      } else if (this.props.answers.length >= index) {
+      } else if (this.props.answers.length >= questionNumber) {
         style = 'complete';
         enableClicking = true;
       } else {
@@ -157,12 +175,20 @@ export class Survey extends React.Component<Readonly<Survey.Props>, Readonly<Sur
       return (
         <QuestionIndicator
           key={index}
-          text={`Question ${index + 1}`}
+          text={`Question ${questionNumber}`}
           style={style}
-          onClick={enableClicking ? this.props.selectQuestion.bind(this, index) : undefined}
+          onClick={enableClicking ? this.changeToQuestion.bind(this, questionNumber) : undefined}
         />
       );
     });
+  }
+
+  private urlForQuestion(questionNumber: number) {
+    return `/question/${questionNumber}`;
+  }
+
+  private changeToQuestion(questionNumber: number) {
+    this.props.history.push(this.urlForQuestion(questionNumber));
   }
 }
 
@@ -178,12 +204,9 @@ const mapDispatchToProps = (dispatch: Dispatch<Survey>, ownProps: Survey.Props) 
     updateQuestionAnswer: (questionIndex: number, answerIndex: number, answer: string) => {
       dispatch(updateQuestionAnswer({questionIndex, answerIndex, answer}));
     },
-    selectQuestion: (questionNumber: number) => {
-      dispatch(selectQuestion(questionNumber));
-    },
   };
 };
 
-const SurveyContainer = connect(mapStateToProps, mapDispatchToProps)(Survey);
+const SurveyContainer = connect(mapStateToProps, mapDispatchToProps)(Survey as any);
 
 export default SurveyContainer;

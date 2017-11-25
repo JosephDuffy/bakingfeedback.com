@@ -12,8 +12,6 @@ import slightlyFrowningFace from '../assets/slightly-frowning-face.svg';
 
 const actionCreator = actionCreatorFactory();
 
-export const selectQuestion = actionCreator<number>('SELECT_QUESTION');
-
 export type AnswerQuestionPlayload = {
   questionIndex: number;
   answerIndex: number;

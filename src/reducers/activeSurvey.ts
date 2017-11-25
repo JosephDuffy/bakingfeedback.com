@@ -1,6 +1,6 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { loadSurvey, selectQuestion, updateQuestionAnswer } from '../actions/activeSurvey';
+import { loadSurvey, updateQuestionAnswer } from '../actions/activeSurvey';
 import Survey from '../interfaces/Survey';
 
 export type State = {
@@ -15,10 +15,6 @@ const initialState = {
 };
 
 const reducer = reducerWithInitialState<State>(initialState)
-  .case(selectQuestion, (state, newQuestion) => ({
-    ...state,
-    currentQuestionIndex: newQuestion,
-  }))
   .case(updateQuestionAnswer, (state, { questionIndex, answerIndex, answer }) => {
     const answers = state.answers;
 
