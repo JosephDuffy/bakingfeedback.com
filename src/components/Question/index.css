@@ -15,4 +15,26 @@
   line-height: 1.5;
   border-radius: .25rem;
   transition: background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+
+  color: #fff;
+  background-color: #28a745;
+  border-color: #1e7e34;
+}
+
+.question-container .submit-button:hover {
+  color: #fff;
+  background-color: #239a3d;
+  border-color: #1e7e34;
+}
+
+.question-container .submit-button:active {
+  color: #fff;
+  background-color: #1e7e34;
+  border-color: #1c7430;
+  box-shadow: 0 0 0 0.2rem rgba(40,167,69,.5);
+}
+
+.question-container .submit-button:focus {
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(40,167,69,.5);
 }

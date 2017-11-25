@@ -6,7 +6,7 @@ namespace QuestionIndicator {
   export interface Props {
     text: string;
     style: Style;
-    onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+    onClick?: () => void;
   }
 
   export type Style = 'locked' | 'current' | 'complete';
@@ -14,6 +14,7 @@ namespace QuestionIndicator {
   export interface State {
     transitionState: TransitionState;
     queuedNextState?: FinalTransitionState;
+    hasFocus: boolean;
   }
 
   export type AnimationTransitionState = 'animating-in' | 'animating-out';
@@ -34,6 +35,7 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
 
     this.state = {
       transitionState: 'hidden',
+      hasFocus: false,
     };
   }
 
@@ -51,24 +53,29 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
   public componentWillReceiveProps(nextProps: QuestionIndicator.Props) {
     if (nextProps.style === 'current') {
       this.showText();
-    } else if (this.state.transitionState === 'showing') {
+    } else {
       this.hideText();
     }
   }
 
   public render() {
     const isCurrent = this.props.style === 'current';
+    const transitionState = this.state.hasFocus ? 'showing' : this.state.transitionState;
 
     return (
       <div
         className={`question-indicator-container ${this.props.style}-question`}
-        onMouseOver={!isCurrent ? () => this.showText() : undefined}
-        onMouseLeave={!isCurrent ? () => this.hideText() : undefined}
-        onClick={this.props.onClick}
+        onMouseOver={!isCurrent ? this.showText : undefined}
+        onMouseLeave={!isCurrent ? this.hideText : undefined}
+        tabIndex={this.props.onClick ? 0 : undefined}
+        onFocus={this.props.onClick ? this.handleFocus : undefined}
+        onBlur={this.handleBlur}
+        onKeyDown={this.props.onClick ? this.handleKeyDown : undefined}
+        onClick={this.props.onClick ? this.handleClick : undefined}
       >
         <span className="question-indicator"></span>
         <div className="question-indicator-text-container">
-            <div className={`question-indicator-text question-indicator-text-${this.state.transitionState}`}>
+            <div className={`question-indicator-text question-indicator-text-${transitionState}`}>
               {this.props.text}
             </div>
         </div>
@@ -76,16 +83,47 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
     );
   }
 
-  private showText() {
+  private handleFocus = () => {
+    this.setState({
+      hasFocus: true,
+    });
+  }
+
+  private handleBlur = () => {
+    this.setState({
+      hasFocus: false,
+    });
+  }
+
+  private handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    switch (event.key) {
+    case 'Enter':
+    case ' ':
+      this.handleClick(event);
+    }
+  }
+
+  private handleClick = (event: React.SyntheticEvent<HTMLDivElement>) => {
+    event.currentTarget.blur();
+
+    if (this.props.onClick) {
+      this.props.onClick();
+    }
+  }
+
+  private showText = () => {
     this.performAnimation('showing');
   }
 
-  private hideText() {
+  private hideText = () => {
     this.performAnimation('hidden');
   }
 
   private performAnimation(finalState: QuestionIndicator.FinalTransitionState, currentState: QuestionIndicator.TransitionState = this.state.transitionState) {
     if (finalState === currentState) {
+      this.setState({
+        queuedNextState: finalState,
+      });
       return;
     }
 
@@ -101,6 +139,9 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
         (finalState === 'hidden' && currentState === 'animating-out') ||
         (finalState === 'showing' && currentState === 'animating-in')
     ) {
+      this.setState({
+        queuedNextState: undefined,
+      });
       return;
     }
 

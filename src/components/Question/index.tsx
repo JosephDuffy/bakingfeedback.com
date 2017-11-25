@@ -72,15 +72,19 @@ class Question extends React.Component<Question.Props, Question.State> {
         {question.title &&
           <h1>{question.title}</h1>
         }
-        {inputs}
-        {renderSubmitButton &&
-          <button
+        <form
+          className="question-form"
+          onSubmit={event => { this.trySubmit(); event.preventDefault(); return false; }}
+        >
+          {inputs}
+          <input
+            type="submit"
             className="submit-button"
-            onClick={() => this.trySubmit()}
-          >
-            Submit
-          </button>
-        }
+            onClick={this.trySubmit}
+            value="Submit"
+            hidden={!renderSubmitButton ? true : undefined}
+          />
+        </form>
       </div>
     );
   }
@@ -147,7 +151,7 @@ class Question extends React.Component<Question.Props, Question.State> {
     return allErrors;
   }
 
-  private trySubmit() {
+  private trySubmit = () => {
     const errors = this.validateAllAnswers();
 
     this.setState({

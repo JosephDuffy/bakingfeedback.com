@@ -1,3 +1,7 @@
+.question-indicator-container:focus {
+    outline: rgba(40, 167, 69, 0.5) auto 0.2rem;
+}
+
 .question-indicator-container .question-indicator {
     background-color: white;
     display: flex;
@@ -18,21 +22,21 @@
     }
 }
 
-.question-indicator-container.locked-question {
+.question-indicator-container.locked-question * {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.question-indicator-container.current-question {
+.question-indicator-container.current-question * {
     cursor: default;
 }
 
-.question-indicator-container.complete-question {
+.question-indicator-container.complete-question * {
     cursor: pointer;
     opacity: 0.6;
 }
 
-.question-indicator-container.complete-question:hover {
+.question-indicator-container.complete-question:hover * {
     opacity: 0.85;
 }
 

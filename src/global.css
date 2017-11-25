@@ -2,10 +2,6 @@ html, body, #root {
   height: 100%;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
 #root {
   flex: 1;
   display: flex;
@@ -25,6 +21,10 @@ main {
   background-color: #41803c;
 
   color: white;
+}
+
+a:focus {
+  outline: rgba(40, 167, 69, 0.5) auto 0.2rem;
 }
 
 @media (min-width: 576px) {
