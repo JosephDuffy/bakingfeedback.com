@@ -1,3 +1,32 @@
+.text-question-container {
+  margin-bottom: 1rem;
+}
+
+.text-question-container small {
+  opacity: 0.8;
+  display: block;
+}
+
+.text-question-container input, .text-question-container textarea {
+  display: block;
+  width: 100%;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  background-color: #fff;
+  background-image: none;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+.text-question-container input:focus, .text-question-container textarea:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(206, 206 , 206, .25);
+}
+
 .text-input-container label {
   display: block;
 }

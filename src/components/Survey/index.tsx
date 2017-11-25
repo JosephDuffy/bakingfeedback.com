@@ -107,7 +107,7 @@ export class Survey extends React.Component<Readonly<Survey.Props>, Readonly<Sur
 
     return (
       <div id="questions-container">
-        <div id="question-container">
+        <div id="current-question-container">
           {content}
         </div>
         <nav id="question-indicators-container">

@@ -4,7 +4,11 @@
   align-items: center;
 }
 
-#question-container h1 {
+#current-question-container {
+  width: 100%
+}
+
+#current-question-container h1 {
   font-size: 12vw;
   text-align: center;
 }
@@ -36,25 +40,25 @@
 }
 
 @media (min-width: 576px) {
-  #question-container h1 {
+  #current-question-container h1 {
       font-size: 10vw;
   }
 }
 
 @media (min-width: 768px) {
-  #question-container h1 {
+  #current-question-container h1 {
       font-size: 7vw;
   }
 }
 
 @media (min-width: 992px) {
-  #question-container h1 {
+  #current-question-container h1 {
       font-size: 5vw;
   }
 }
 
 @media (min-width: 1200px) {
-  #question-container h1 {
+  #current-question-container h1 {
       font-size: 4vw;
   }
 }

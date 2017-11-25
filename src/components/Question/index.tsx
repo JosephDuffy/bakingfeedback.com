@@ -79,6 +79,7 @@ class Question extends React.Component<Question.Props, Question.State> {
         {inputs}
         {renderSubmitButton &&
           <button
+            className="submit-button"
             onClick={() => this.trySubmit()}
           >
             Submit
