@@ -56,10 +56,20 @@ export class Survey extends React.Component<Survey.AllProps, Survey.State> {
     return this.currentQuestionIndex >= questions.length;
   }
 
+  constructor(props: Survey.AllProps) {
+    super(props);
+
+    this.state = {
+      loadingSurvey: false,
+    };
+  }
+
   public componentWillMount() {
-    if (!this.props.survey) {
-      this.props.loadSurvey();
-    }
+    this.checkProps(this.props);
+  }
+
+  public componentWillReceiveProps(nextProps: Survey.AllProps) {
+    this.checkProps(nextProps);
   }
 
   public render() {
@@ -193,6 +203,12 @@ export class Survey extends React.Component<Survey.AllProps, Survey.State> {
 
   private changeToQuestion(questionNumber: number) {
     this.props.history.push(this.urlForQuestion(questionNumber));
+  }
+
+  private checkProps(props: Survey.AllProps) {
+    if (!props.survey && !this.state.loadingSurvey && !this.state.loadingError) {
+      props.loadSurvey();
+    }
   }
 }
 
