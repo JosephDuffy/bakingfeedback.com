@@ -69,16 +69,20 @@ export class Survey extends React.Component<Survey.AllProps, Survey.State> {
       );
     }
 
-    const { survey } = this.props;
+    const { answers, survey } = this.props;
     const { questions } = survey;
 
-    if (this.currentQuestionIndex < 0 || this.currentQuestionIndex > questions.length) {
+    if (this.currentQuestionIndex < 0) {
       return (
-        <Redirect to={`/question/${1}`} />
+        <Redirect to="/question/1" />
+      );
+    } else if (this.currentQuestionIndex > answers.length) {
+      return (
+        <Redirect to={`/question/${answers.length + 1}`} />
       );
     }
 
-    const currentQuestionAnswers = this.props.answers[this.currentQuestionIndex] || [];
+    const currentQuestionAnswers = answers[this.currentQuestionIndex] || [];
 
     const submitQuestion: QuestionInterface = {
       id: 'submit',
