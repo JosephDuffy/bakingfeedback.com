@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 
 import './index.css';
 
@@ -6,7 +7,7 @@ namespace QuestionIndicator {
   export interface Props {
     text: string;
     style: Style;
-    onClick?: () => void;
+    href?: string;
   }
 
   export type Style = 'locked' | 'current' | 'complete';
@@ -62,25 +63,42 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
     const isCurrent = this.props.style === 'current';
     const transitionState = this.state.hasFocus ? 'showing' : this.state.transitionState;
 
-    return (
-      <div
-        className={`question-indicator-container ${this.props.style}-question`}
-        onMouseOver={!isCurrent ? this.showText : undefined}
-        onMouseLeave={!isCurrent ? this.hideText : undefined}
-        tabIndex={this.props.onClick ? 0 : undefined}
-        onFocus={this.props.onClick ? this.handleFocus : undefined}
-        onBlur={this.handleBlur}
-        onKeyDown={this.props.onClick ? this.handleKeyDown : undefined}
-        onClick={this.props.onClick ? this.handleClick : undefined}
-      >
-        <span className="question-indicator"></span>
-        <div className="question-indicator-text-container">
-            <div className={`question-indicator-text question-indicator-text-${transitionState}`}>
-              {this.props.text}
-            </div>
+    if (this.props.href) {
+      return (
+        <Link
+          to={this.props.href}
+          className={`question-indicator-container ${this.props.style}-question`}
+          onMouseOver={!isCurrent ? this.showText : undefined}
+          onMouseLeave={!isCurrent ? this.hideText : undefined}
+          onFocus={this.props.href ? this.handleFocus : undefined}
+          onBlur={this.handleBlur}
+        >
+          <span className="question-indicator"></span>
+          <div className="question-indicator-text-container">
+              <div className={`question-indicator-text question-indicator-text-${transitionState}`}>
+                {this.props.text}
+              </div>
+          </div>
+        </Link>
+      );
+    } else {
+      return (
+        <div
+          className={`question-indicator-container ${this.props.style}-question`}
+          onMouseOver={!isCurrent ? this.showText : undefined}
+          onMouseLeave={!isCurrent ? this.hideText : undefined}
+          onFocus={this.props.href ? this.handleFocus : undefined}
+          onBlur={this.handleBlur}
+        >
+          <span className="question-indicator"></span>
+          <div className="question-indicator-text-container">
+              <div className={`question-indicator-text question-indicator-text-${transitionState}`}>
+                {this.props.text}
+              </div>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   private handleFocus = () => {
@@ -93,22 +111,6 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
     this.setState({
       hasFocus: false,
     });
-  }
-
-  private handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    switch (event.key) {
-    case 'Enter':
-    case ' ':
-      this.handleClick(event);
-    }
-  }
-
-  private handleClick = (event: React.SyntheticEvent<HTMLDivElement>) => {
-    event.currentTarget.blur();
-
-    if (this.props.onClick) {
-      this.props.onClick();
-    }
   }
 
   private showText = () => {

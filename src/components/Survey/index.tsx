@@ -164,7 +164,7 @@ export class Survey extends React.Component<Survey.AllProps, Survey.State> {
       if (this.currentQuestionIndex === index) {
         style = 'current';
         enableClicking = false;
-      } else if (this.props.answers.length >= questionNumber) {
+      } else if (this.props.answers.length >= index) {
         style = 'complete';
         enableClicking = true;
       } else {
@@ -177,7 +177,7 @@ export class Survey extends React.Component<Survey.AllProps, Survey.State> {
           key={index}
           text={`Question ${questionNumber}`}
           style={style}
-          onClick={enableClicking ? this.changeToQuestion.bind(this, questionNumber) : undefined}
+          href={enableClicking ? this.urlForQuestion(questionNumber) : undefined}
         />
       );
     });
