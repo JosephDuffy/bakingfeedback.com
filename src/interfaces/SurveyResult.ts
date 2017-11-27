@@ -3,11 +3,11 @@ export default interface SurveyResult {
 
   readonly surveyId: string;
 
-  readonly answers: any[];
+  readonly answers: string[][];
 
-  readonly public: boolean;
+  readonly name: string;
 
-  readonly name?: string;
+  readonly anonymous: boolean;
 
   readonly email?: string;
 

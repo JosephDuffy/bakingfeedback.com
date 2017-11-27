@@ -54,18 +54,18 @@ class Question extends React.Component<Question.Props, Question.State> {
       // TODO: Render errors
 
       switch (input.type) {
-        case QuestionInterface.InputType.Images:
+        case 'images':
           return (
             <ImageQuestionInput answer={answer} key={index} options={input.options as QuestionInterface.ImagesOptions} updateAnswer={this.handleAnswerUpdated.bind(this, index)} trySubmit={this.trySubmit.bind(this)} />
           );
-        case QuestionInterface.InputType.Text:
+        case 'text':
           return (
             <TextQuestionInput answer={answer} key={index} options={input.options as QuestionInterface.TextOptions} updateAnswer={this.handleAnswerUpdated.bind(this, index)} trySubmit={this.trySubmit.bind(this)} />
           );
       }
     });
 
-    const renderSubmitButton = question.inputs.length > 1 || question.inputs[0].type !== QuestionInterface.InputType.Images;
+    const renderSubmitButton = question.inputs.length > 1 || question.inputs[0].type !== 'images';
 
     return (
       <div className="question-container">
@@ -116,12 +116,12 @@ class Question extends React.Component<Question.Props, Question.State> {
     const errors: string[] = [];
 
     switch (input.type) {
-      case QuestionInterface.InputType.Images:
+      case 'images':
         if (answer === '') {
           errors.push('An answer is required');
         }
         break;
-      case QuestionInterface.InputType.Text:
+      case 'text':
         const options = input.options as QuestionInterface.TextOptions;
 
         if (options.minimumCharacters && answer.length < options.minimumCharacters) {

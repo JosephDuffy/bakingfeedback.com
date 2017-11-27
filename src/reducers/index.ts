@@ -1,22 +1,17 @@
 import * as localForage from 'localforage';
-import { combineReducers } from 'redux';
-import { persistReducer } from 'redux-persist';
+import { persistCombineReducers } from 'redux-persist';
 
-import activeSurvey, { State as ActiveSurveyState } from './activeSurvey';
+import surveyAnswers, { State as SurveysAnswersState } from './surveyAnswers';
+import surveys, { State as SurveysState } from './surveys';
 
 export type AppState = {
-  activeSurvey: ActiveSurveyState,
+  surveys: SurveysState,
+  surveyAnswers: SurveysAnswersState,
 };
-
-const combinedReducers = combineReducers<AppState>({
-  activeSurvey,
-});
 
 const config = {
   key: 'app',
   storage: localForage,
 };
 
-const persistedReducer = persistReducer(config, combinedReducers);
-
-export default persistedReducer;
+export default persistCombineReducers(config, { surveys, surveyAnswers });

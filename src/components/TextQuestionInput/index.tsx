@@ -9,6 +9,8 @@ export default class TextQuestionInput extends React.Component<QuestionInputComp
   public render() {
     const { options } = this.props;
 
+    // TODO: Render "required" indicator
+
     return options.allowMultipleLines ? this.renderTextField() : this.renderTextInput();
   }
 

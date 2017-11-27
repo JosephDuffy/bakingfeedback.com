@@ -9,6 +9,7 @@ import { PersistGate } from 'redux-persist/lib/integration/react';
 import './global.css';
 
 import Footer from './components/Footer';
+import LoadLatestSurvey from './components/LoadLatestSurvey';
 import Survey from './components/Survey';
 
 import registerServiceWorker from './registerServiceWorker';
@@ -21,16 +22,17 @@ ReactDOM.render(
   <Provider store={store}>
     <PersistGate
       persistor={persistor}
-      loading={<div>Loading...</div>}
+      loading={<div>Rehydrating...</div>}
     >
       <main>
         <Router
           history={history}
         >
           <Switch>
-            <Route path="/" exact={true} component={Survey} />
-            <Route path="/question/" exact={true} component={Survey} />
-            <Route path="/question/:questionNumber" exact={true} component={Survey} />
+            <Route path="/" exact={true} component={LoadLatestSurvey} />
+            <Route path="/latest-survey" exact={true} component={LoadLatestSurvey} />
+            <Route path="/:surveyId/" exact={true} component={Survey} />
+            <Route path="/:surveyId/question-:questionNumber" exact={true} component={Survey} />
           </Switch>
         </Router>
       </main>
