@@ -17,7 +17,9 @@ export default class TextQuestionInput extends React.Component<QuestionInputComp
   private renderTextField() {
     return (
       <div className="text-field-container text-question-container">
-        <label>{this.props.options.label}</label>
+        {this.props.options.label &&
+          <label>{this.props.options.label}</label>
+        }
         <textarea
           onChange={event => this.props.updateAnswer(event.target.value, true, false)}
           onSubmit={event => this.props.trySubmit()}
@@ -34,7 +36,9 @@ export default class TextQuestionInput extends React.Component<QuestionInputComp
   private renderTextInput() {
     return (
       <div className="text-input-container text-question-container">
-        <label>{this.props.options.label}</label>
+        {this.props.options.label &&
+          <label>{this.props.options.label}</label>
+        }
         <input
           type="text"
           value={this.props.answer}

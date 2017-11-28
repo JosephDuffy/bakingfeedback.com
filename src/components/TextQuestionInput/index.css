@@ -30,3 +30,7 @@
 .text-input-container label {
   display: block;
 }
+
+.text-question-container textarea {
+  min-height: 200px;
+}

@@ -20,8 +20,8 @@ namespace Question {
   }
 
   export interface TextOptions {
-    readonly label: string;
     readonly allowMultipleLines: boolean;
+    readonly label?: string;
     readonly placeholder?: string;
     readonly hint?: string;
     readonly minimumCharacters?: number;
