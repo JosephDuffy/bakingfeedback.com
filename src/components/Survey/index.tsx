@@ -101,7 +101,6 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
         />
       );
     }
-
     const currentQuestionAnswers = answers[this.currentQuestionIndex] || [];
 
     const submitQuestion: QuestionInterface = {
@@ -140,6 +139,10 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
         const question = questions[this.currentQuestionIndex];
         return (
           <Question
+            // Key is needed to tell React that every `Question` is unique, so that
+            // events from the previous question don't also happen for the next one,
+            // e.g., when answering a picture and moving to another picture question
+            key={`question-${this.currentQuestionIndex}`}
             question={question}
             answers={currentQuestionAnswers}
             onAnswerUpdated={this.onAnswerUpdated.bind(this, this.currentQuestionIndex)}
