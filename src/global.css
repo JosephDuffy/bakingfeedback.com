@@ -27,9 +27,17 @@ a:focus {
   outline: rgba(40, 167, 69, 0.5) auto 0.2rem;
 }
 
+h1 {
+  font-size: 12vw;
+}
+
 @media (min-width: 576px) {
   main {
       width: 90%;
+  }
+
+  h1 {
+      font-size: 10vw;
   }
 }
 
@@ -37,16 +45,28 @@ a:focus {
   main {
       width: 80%
   }
+
+  h1 {
+      font-size: 7vw;
+  }
 }
 
 @media (min-width: 992px) {
   main {
       width: 70%;
   }
+
+  h1 {
+      font-size: 5vw;
+  }
 }
 
 @media (min-width: 1200px) {
   main {
       width: 60%;
+  }
+
+  h1 {
+      font-size: 4vw;
   }
 }

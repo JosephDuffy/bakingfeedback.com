@@ -5,6 +5,7 @@ import { AppState } from '../../reducers';
 import './index.css';
 
 import { loadSurveyWorker, updateQuestionAnswer } from '../../actions/surveys';
+import { apiBaseURL } from '../../config';
 import { default as QuestionInterface } from '../../interfaces/Question';
 import { default as SurveyInterface } from '../../interfaces/Survey';
 import Question from '../Question';
@@ -14,12 +15,14 @@ export namespace Survey {
   export type Props = Survey.DispatchProps & Survey.RouteProps;
 
   export interface DispatchProps {
-    answers: string[][];
+    answers: Array<{
+      [inputId: string]: string,
+    }>;
     survey?: SurveyInterface;
-    loadingError?: Error;
-    loading: boolean;
+    loadError?: Error,
+    loading: boolean,
     loadSurvey: () => void;
-    updateQuestionAnswer: (questionIndex: number, answerIndex: number, answer: string) => void;
+    updateQuestionAnswer: (questionIndex: number, inputId: string, answer: string) => void;
   }
 
   export type RouteProps = RouteComponentProps<RouteParameters>;
@@ -29,7 +32,10 @@ export namespace Survey {
     questionNumber?: string;
   }
 
-  export interface State {}
+  export interface State {
+    submitting: boolean;
+    submissionError?: Error;
+  }
 }
 
 export class Survey extends React.Component<Survey.Props, Survey.State> {
@@ -40,6 +46,23 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
     }
 
     return Number.parseInt(this.props.match.params.questionNumber, 10) - 1;
+  }
+
+  private get lastQuestionNumberUnlocked() {
+    if (!this.props.survey) {
+      return 1;
+    }
+
+    // +1 for submit question
+    const totalQuestions = this.props.survey.questions.length + 1;
+
+    for (let questionNumber = 1; questionNumber <= totalQuestions; questionNumber++) {
+      if (!this.props.answers.hasOwnProperty(questionNumber)) {
+        return questionNumber;
+      }
+    }
+
+    return totalQuestions;
   }
 
   private get isOnSubmit(): boolean {
@@ -53,6 +76,14 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
     return this.currentQuestionIndex >= questions.length;
   }
 
+  constructor(props: Survey.Props) {
+    super(props);
+
+    this.state = {
+      submitting: false,
+    };
+  }
+
   public componentWillMount() {
     this.checkProps(this.props);
   }
@@ -62,16 +93,27 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
   }
 
   public render() {
-    if (this.props.loadingError) {
+    if (this.props.loading) {
+      return (
+        <div>Loading survey...</div>
+      );
+    } else if (this.props.loadError) {
       return (
         <div>
           <h1>Error Loading Survey :(</h1>
-          <div>{this.props.loadingError.message}</div>
+          <div>{this.props.loadError.message}</div>
         </div>
       );
     } else if (!this.props.survey) {
       return (
-        <div>Loading survey...</div>
+        <div>🤯🤯🤯</div>
+      );
+    } else if (!this.props.match.params.questionNumber) {
+      return (
+        <Redirect
+          to={this.urlForQuestion(1)}
+          push={false}
+        />
       );
     }
 
@@ -93,7 +135,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
         />
       );
     } else if (`${this.currentQuestionIndex + 1}` !== this.props.match.params.questionNumber) {
-      // `Number.parseInt` wil happily parse `1-and-lots-more` as `1`
+      // `Number.parseInt` will happily parse `1-and-lots-more` as `1`
       return (
         <Redirect
           to={this.urlForQuestion(this.currentQuestionIndex + 1)}
@@ -101,12 +143,14 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
         />
       );
     }
-    const currentQuestionAnswers = answers[this.currentQuestionIndex] || [];
+
+    const currentQuestionAnswers = answers[this.currentQuestionIndex] || {};
 
     const submitQuestion: QuestionInterface = {
       title: 'About You',
       inputs: [
         {
+          id: 'name',
           type: 'text',
           options: {
             label: 'Name',
@@ -115,6 +159,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
           },
         },
         {
+          id: 'email',
           type: 'text',
           options: {
             label: 'Email Address',
@@ -125,19 +170,24 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       ],
     };
 
-    const content = (() => {
-      if (this.isOnSubmit) {
-        return (
-          <Question
-            question={submitQuestion}
-            answers={currentQuestionAnswers}
-            onAnswerUpdated={this.onAnswerUpdated.bind(this, this.currentQuestionIndex)}
-            onSubmit={this.handleQuestionSubmit}
-          />
-        );
-      } else {
-        const question = questions[this.currentQuestionIndex];
-        return (
+    let question: QuestionInterface;
+    let nextButtonText: string | undefined;
+
+    if (this.isOnSubmit) {
+      question = submitQuestion;
+      nextButtonText = 'Submit';
+    } else {
+      question = questions[this.currentQuestionIndex];
+    }
+
+    const allQuestions = survey.questions.concat(submitQuestion);
+
+    return (
+      <div id="questions-container">
+        {this.state.submissionError &&
+          <div className="form-error">{this.state.submissionError.message}</div>
+        }
+        <div id="current-question-container">
           <Question
             // Key is needed to tell React that every `Question` is unique, so that
             // events from the previous question don't also happen for the next one,
@@ -147,17 +197,8 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
             answers={currentQuestionAnswers}
             onAnswerUpdated={this.onAnswerUpdated.bind(this, this.currentQuestionIndex)}
             onSubmit={this.handleQuestionSubmit}
+            nextButtonText={nextButtonText}
           />
-        );
-      }
-    })();
-
-    const allQuestions = survey.questions.concat(submitQuestion);
-
-    return (
-      <div id="questions-container">
-        <div id="current-question-container">
-          {content}
         </div>
         <nav id="question-indicators-container">
           {this.questionIndicators(allQuestions)}
@@ -166,13 +207,67 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
     );
   }
 
-  private onAnswerUpdated(questionIndex: number, answerIndex: number, answer: string) {
-    this.props.updateQuestionAnswer(questionIndex, answerIndex, answer);
+  private onAnswerUpdated(questionIndex: number, inputId: string, answer: string) {
+    this.props.updateQuestionAnswer(questionIndex, inputId, answer);
   }
 
   private handleQuestionSubmit = () => {
     if (this.isOnSubmit) {
-      // TODO: Submit
+      if (this.state.submitting || !this.props.survey) {
+        return;
+      }
+
+      const headers = new Headers({
+        'Content-Type': 'application/json',
+      });
+
+      const { answers, survey } = this.props;
+      const lastAnswer = answers.pop();
+
+      if (!lastAnswer) {
+        return;
+      }
+
+      const name = lastAnswer.name;
+      const email = lastAnswer.email;
+
+      const body = JSON.stringify({
+        answers,
+        name,
+        email,
+        anonymous: true,
+      });
+
+      const options = {
+        method: 'POST',
+        headers,
+        body,
+      };
+
+      this.setState({
+        submitting: true,
+      });
+
+      fetch(`${apiBaseURL}/surveys/${survey.id}/results`, options)
+        .then(response => {
+          if (response.status !== 201) {
+            console.error(response);
+
+            this.setState({
+              submitting: false,
+              submissionError: new Error('Failed to submit survey. Please try again.'),
+            });
+            return;
+          }
+
+          this.props.history.push('/survey-complete');
+        })
+        .catch(error => {
+          this.setState({
+            submitting: false,
+            submissionError: error,
+          });
+        });
     } else {
       if (this.currentQuestionIndex > -1) {
         this.changeToQuestion(this.currentQuestionIndex + 2);
@@ -217,7 +312,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
   }
 
   private checkProps(props: Survey.Props) {
-    if (!props.survey && !props.loading && !props.loadingError) {
+    if (!props.survey && !this.props.loadError && !this.props.loading) {
       props.loadSurvey();
     }
   }
@@ -226,7 +321,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
 const mapStateToProps = (state: AppState, ownProps: Survey.Props) => {
   return {
     ...state.surveys.surveys[ownProps.match.params.surveyId],
-    answers: (state.surveyAnswers[ownProps.match.params.surveyId] || { answers: [] }).answers,
+    answers: state.surveyAnswers[ownProps.match.params.surveyId] || [],
   };
 };
 
@@ -235,11 +330,11 @@ const mapDispatchToProps = (dispatch: Dispatch<Survey>, ownProps: Survey.Props) 
     loadSurvey: () => {
       dispatch(loadSurveyWorker({ id: ownProps.match.params.surveyId }));
     },
-    updateQuestionAnswer: (questionIndex: number, answerIndex: number, answer: string) => {
+    updateQuestionAnswer: (questionIndex: number, inputId: string, answer: string) => {
       dispatch(updateQuestionAnswer({
         surveyId: ownProps.match.params.surveyId,
         questionIndex,
-        answerIndex,
+        inputId,
         answer,
       }));
     },

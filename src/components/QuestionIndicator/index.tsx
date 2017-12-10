@@ -63,42 +63,34 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
     const isCurrent = this.props.style === 'current';
     const transitionState = this.state.hasFocus ? 'showing' : this.state.transitionState;
 
-    if (this.props.href) {
-      return (
-        <Link
-          to={this.props.href}
-          className={`question-indicator-container ${this.props.style}-question`}
-          onMouseOver={!isCurrent ? this.showText : undefined}
-          onMouseLeave={!isCurrent ? this.hideText : undefined}
-          onFocus={this.props.href ? this.handleFocus : undefined}
-          onBlur={this.handleBlur}
-        >
-          <span className="question-indicator"></span>
-          <div className="question-indicator-text-container">
-              <div className={`question-indicator-text question-indicator-text-${transitionState}`}>
-                {this.props.text}
-              </div>
+    const contents = [
+      <span key="indicator" className="question-indicator"></span>,
+      <div key="text-container" className="question-indicator-text-container">
+          <div className={`question-indicator-text question-indicator-text-${transitionState}`}>
+            {this.props.text}
           </div>
-        </Link>
-      );
-    } else {
-      return (
-        <div
-          className={`question-indicator-container ${this.props.style}-question`}
-          onMouseOver={!isCurrent ? this.showText : undefined}
-          onMouseLeave={!isCurrent ? this.hideText : undefined}
-          onFocus={this.props.href ? this.handleFocus : undefined}
-          onBlur={this.handleBlur}
-        >
-          <span className="question-indicator"></span>
-          <div className="question-indicator-text-container">
-              <div className={`question-indicator-text question-indicator-text-${transitionState}`}>
-                {this.props.text}
-              </div>
-          </div>
-        </div>
-      );
-    }
+      </div>,
+    ];
+
+    return (
+      <div
+        className={`question-indicator-container ${this.props.style}-question`}
+        onMouseOver={!isCurrent ? this.showText : undefined}
+        onMouseLeave={!isCurrent ? this.hideText : undefined}
+        onFocus={!isCurrent ? this.handleFocus : undefined}
+        onBlur={this.handleBlur}
+      >
+        {this.props.href ? (
+          <Link
+            to={this.props.href}
+          >
+            {contents}
+          </Link>
+        ) : (
+          contents
+        )}
+      </div>
+    );
   }
 
   private handleFocus = () => {
@@ -124,7 +116,7 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
   private performAnimation(finalState: QuestionIndicator.FinalTransitionState, currentState: QuestionIndicator.TransitionState = this.state.transitionState) {
     if (finalState === currentState) {
       this.setState({
-        queuedNextState: finalState,
+        queuedNextState: undefined,
       });
       return;
     }
@@ -159,6 +151,7 @@ class QuestionIndicator extends React.Component<QuestionIndicator.Props, Questio
     this.setState({
       transitionState: animationState,
       queuedNextState: undefined,
+      hasFocus: false,
     }, () => {
       setTimeout(() => {
         if (this.state.queuedNextState) {

@@ -23,9 +23,8 @@ export default class TextQuestionInput extends React.Component<QuestionInputComp
         <textarea
           onChange={event => this.props.updateAnswer(event.target.value, true, false)}
           onSubmit={event => this.props.trySubmit()}
-        >
-          {this.props.answer}
-        </textarea>
+          value={this.props.answer}
+        />
         {this.props.options.hint &&
           <small className="tip">{this.props.options.hint}</small>
         }

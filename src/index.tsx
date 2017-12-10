@@ -11,6 +11,7 @@ import './global.css';
 import Footer from './components/Footer';
 import LoadLatestSurvey from './components/LoadLatestSurvey';
 import Survey from './components/Survey';
+import SurveyComplete from './components/SurveyComplete';
 
 import registerServiceWorker from './registerServiceWorker';
 import { configureStore } from './store';
@@ -31,6 +32,7 @@ ReactDOM.render(
           <Switch>
             <Route path="/" exact={true} component={LoadLatestSurvey} />
             <Route path="/latest-survey" exact={true} component={LoadLatestSurvey} />
+            <Route path="/survey-complete" exact={true} component={SurveyComplete} />
             <Route path="/:surveyId/" exact={true} component={Survey} />
             <Route path="/:surveyId/question-:questionNumber" exact={true} component={Survey} />
           </Switch>

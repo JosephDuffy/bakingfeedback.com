@@ -4686,7 +4686,7 @@ redux-thunk@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/redux-thunk/-/redux-thunk-2.2.0.tgz#e615a16e16b47a19a515766133d1e3e99b7852e5"
 
-redux@^3.6.0, redux@^3.7.0, redux@^3.7.2:
+redux@^3.6.0, redux@^3.7.2:
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/redux/-/redux-3.7.2.tgz#06b73123215901d25d065be342eb026bc1c8537b"
   dependencies:
@@ -5601,16 +5601,13 @@ typescript-fsa-reducers@^0.4.4:
   dependencies:
     typescript-fsa "^2.0.0"
 
-typescript-fsa-redux-thunk@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/typescript-fsa-redux-thunk/-/typescript-fsa-redux-thunk-1.0.0.tgz#0ad6db6f859089d65dabcc8df1b830cafb3eeb57"
+typescript-fsa-redux-thunk@^2.0.0-beta.6:
+  version "2.0.0-beta.6"
+  resolved "https://registry.yarnpkg.com/typescript-fsa-redux-thunk/-/typescript-fsa-redux-thunk-2.0.0-beta.6.tgz#abcca60be42838b0ac05f2414082c047deabe677"
   dependencies:
-    redux "^3.7.0"
-    redux-thunk "^2.2.0"
-    tslib "^1.7.1"
-    typescript-fsa "^2.3.0"
+    typescript-fsa "^2.5.0"
 
-typescript-fsa@^2.0.0, typescript-fsa@^2.3.0:
+typescript-fsa@^2.0.0, typescript-fsa@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/typescript-fsa/-/typescript-fsa-2.5.0.tgz#1baec01b5e8f5f34c322679d1327016e9e294faf"
 

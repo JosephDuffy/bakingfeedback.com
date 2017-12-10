@@ -38,7 +38,7 @@
     "tslint-react": "^3.2.0",
     "typescript": "~2.6.1",
     "typescript-fsa-reducers": "^0.4.4",
-    "typescript-fsa-redux-thunk": "^1.0.0",
+    "typescript-fsa-redux-thunk": "^2.0.0-beta.6",
     "url-loader": "0.6.2",
     "webpack": "3.8.1",
     "webpack-dev-server": "2.9.4",

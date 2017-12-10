@@ -1,40 +1,31 @@
-import * as localForage from 'localforage';
-import { persistReducer } from 'redux-persist';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { updateQuestionAnswer } from '../actions/surveys';
 
 export type State = {
-  [surveyId: string]: {
-    answers: string[][],
-  },
+  [surveyId: string]: Array<{
+    [inputId: string]: any,
+  }>,
 };
 
 const initialState = {};
 
 const reducer = reducerWithInitialState<State>(initialState)
-  .case(updateQuestionAnswer, (state, { surveyId, questionIndex, answerIndex, answer }) => {
+  .case(updateQuestionAnswer, (state, { surveyId, questionIndex, inputId, answer }) => {
     const answers = state;
 
     if (answers[surveyId] === undefined) {
-      answers[surveyId] = {
-        answers: [],
-      };
+      answers[surveyId] = [];
     }
 
-    if (answers[surveyId].answers[questionIndex] === undefined) {
-      answers[surveyId].answers[questionIndex] = [];
+    if (answers[surveyId][questionIndex] === undefined) {
+      answers[surveyId][questionIndex] = {};
     }
 
-    answers[surveyId].answers[questionIndex][answerIndex] = answer;
+    answers[surveyId][questionIndex][inputId] = answer;
 
     return answers;
   })
   .build();
 
-const config = {
-  key: 'surveyAnswers',
-  storage: localForage,
-};
-
-export default persistReducer(config, reducer);
+export default reducer;

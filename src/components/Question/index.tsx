@@ -9,14 +9,20 @@ import TextQuestionInput from '../TextQuestionInput';
 namespace Question {
   export interface Props {
     question: QuestionInterface;
-    answers: string[];
+    answers: {
+      [inputId: string]: string;
+    };
+    /// Will default to "Next"
+    nextButtonText?: string;
 
-    onAnswerUpdated: (index: number, answer: string) => void;
+    onAnswerUpdated: (inputId: string, answer: string) => void;
     onSubmit: () => void;
   }
 
   export interface State {
-    errors: string[][];
+    errors: {
+      [inputId: string]: string[];
+    };
     tryingSubmit: boolean;
   }
 
@@ -32,7 +38,7 @@ class Question extends React.Component<Question.Props, Question.State> {
     super(props);
 
     this.state = {
-      errors: new Array(props.question.inputs.length),
+      errors: {},
       tryingSubmit: false,
     };
   }
@@ -40,7 +46,7 @@ class Question extends React.Component<Question.Props, Question.State> {
   public componentWillReceiveProps(nextProps: Question.Props) {
     if (this.props.question !== nextProps.question) {
       this.setState({
-        errors: new Array(nextProps.question.inputs.length),
+        errors: {},
       });
     }
   }
@@ -48,19 +54,19 @@ class Question extends React.Component<Question.Props, Question.State> {
   public render() {
     const { question } = this.props;
 
-    const inputs = question.inputs.map((input, index) => {
-      const answer = this.props.answers[index];
+    const inputs = question.inputs.map(input => {
+      const answer = this.props.answers[input.id];
 
       // TODO: Render errors
 
       switch (input.type) {
         case 'images':
           return (
-            <ImageQuestionInput answer={answer} key={index} options={input.options as QuestionInterface.ImagesOptions} updateAnswer={this.handleAnswerUpdated.bind(this, index)} trySubmit={this.trySubmit.bind(this)} />
+            <ImageQuestionInput answer={answer} key={input.id} options={input.options as QuestionInterface.ImagesOptions} updateAnswer={this.handleAnswerUpdated.bind(this, input.id)} trySubmit={this.trySubmit.bind(this)} />
           );
         case 'text':
           return (
-            <TextQuestionInput answer={answer} key={index} options={input.options as QuestionInterface.TextOptions} updateAnswer={this.handleAnswerUpdated.bind(this, index)} trySubmit={this.trySubmit.bind(this)} />
+            <TextQuestionInput answer={answer} key={input.id} options={input.options as QuestionInterface.TextOptions} updateAnswer={this.handleAnswerUpdated.bind(this, input.id)} trySubmit={this.trySubmit.bind(this)} />
           );
       }
     });
@@ -81,7 +87,7 @@ class Question extends React.Component<Question.Props, Question.State> {
             type="submit"
             className="submit-button"
             onClick={this.trySubmit}
-            value="Submit"
+            value={this.props.nextButtonText || 'Next'}
             hidden={!renderSubmitButton ? true : undefined}
           />
         </form>
@@ -89,30 +95,35 @@ class Question extends React.Component<Question.Props, Question.State> {
     );
   }
 
-  private handleAnswerUpdated(index: number, answer: string, validate: boolean, trySubmit: boolean = false) {
-    this.props.onAnswerUpdated(index, answer);
+  private handleAnswerUpdated(inputId: string, answer: string, validate: boolean, trySubmit: boolean = false) {
+    this.props.onAnswerUpdated(inputId, answer);
 
     if (trySubmit) {
       this.trySubmit();
       return;
     }
 
-    const performValidation = validate || this.state.errors[index].length > 0;
+    const performValidation = validate || this.state.errors[inputId].length > 0;
 
     if (performValidation) {
-      const errors = this.validateAnswer(index, answer);
+      const errors = this.validateAnswer(inputId, answer);
 
       this.setState({
         errors: {
           ...this.state.errors,
-          [index]: errors,
+          [inputId]: errors,
         },
       });
     }
   }
 
-  private validateAnswer(answerIndex: number, answer: string): string[] {
-    const input = this.props.question.inputs[answerIndex];
+  private validateAnswer(inputId: string, answer: string): string[] {
+    const input = this.props.question.inputs.find(i => i.id === inputId);
+
+    if (!input) {
+      return [];
+    }
+
     const errors: string[] = [];
 
     switch (input.type) {
@@ -135,16 +146,18 @@ class Question extends React.Component<Question.Props, Question.State> {
     return errors;
   }
 
-  private validateAllAnswers(): string[][] {
+  private validateAllAnswers(): { [inputId: string]: string[]; } {
     const { answers } = this.props;
-    const allErrors: string[][] = [];
+    const allErrors: {
+      [inputId: string]: string[];
+    } = {};
 
     // `Array.from` is a hack: https://github.com/Microsoft/TypeScript/issues/11209#issuecomment-303152976
-    for (const index of Array.from(answers.keys())) {
-      const answer = answers[index];
-      const errors = this.validateAnswer(index, answer);
+    for (const inputId of Array.from(Object.keys(answers))) {
+      const answer = answers[inputId];
+      const errors = this.validateAnswer(inputId, answer);
       if (errors.length > 0) {
-        allErrors[index] = errors;
+        allErrors[inputId] = errors;
       }
     }
 
@@ -158,7 +171,7 @@ class Question extends React.Component<Question.Props, Question.State> {
       errors,
     });
 
-    if (errors.length === 0) {
+    if (Object.keys(errors).length === 0) {
       this.props.onSubmit();
     }
   }

@@ -2,16 +2,16 @@
     outline: rgba(40, 167, 69, 0.5) auto 0.2rem;
 }
 
-.question-indicator-container:hover {
-    text-decoration: none;
-}
-
 .question-indicator-container .question-indicator {
     background-color: white;
     display: flex;
     margin-top: 2px;
     margin-bottom: 2px;
     height: 1px;
+}
+
+.question-indicator-container a:hover {
+    text-decoration: none;
 }
 
 @media (min-device-pixel-ratio: 2) {

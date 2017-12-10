@@ -1,5 +1,3 @@
-import * as localForage from 'localforage';
-import { createTransform, persistReducer } from 'redux-persist';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { loadSurvey } from '../actions/surveys';
@@ -57,42 +55,15 @@ const reducer = reducerWithInitialState<State>(initialState)
   })
   .case(loadSurvey.failed, (state, failure) => ({
     ...state,
-    [failure.params.id]: {
-      ...state[failure.params.id],
-      loadError: failure.error,
-      loading: false,
+    surveys: {
+      ...state.surveys,
+      [failure.params.id]: {
+        ...state[failure.params.id],
+        loadError: failure.error,
+        loading: false,
+      },
     },
   }))
   .build();
 
-const transforms = createTransform(
-  // transform state coming from redux on its way to being serialized and stored
-  (state: State) => state,
-  // transform state coming from storage, on its way to be rehydrated into redux
-  (state: State, key: string) => {
-    if (key === 'surveys') {
-      const surveys = Object.keys(state.surveys).map(surveyId => {
-        const survey = state.surveys[surveyId];
-        delete survey.loadError;
-        survey.loading = false;
-        return survey;
-      });
-      return {
-        ...state,
-        surveys,
-      };
-    }
-    return state;
-  },
-  {
-    whitelist: ['surveys'],
-  },
-);
-
-export const config = {
-  key: 'surveys',
-  storage: localForage,
-  transforms: [transforms],
-};
-
-export default persistReducer(config, reducer);
+export default reducer;

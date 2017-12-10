@@ -1,6 +1,7 @@
 
 namespace Question {
   export interface Input {
+    readonly id: string;
     readonly type: 'images' | 'text';
     readonly options: Options;
   }

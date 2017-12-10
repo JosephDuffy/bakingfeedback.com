@@ -6,13 +6,13 @@ import Survey from '../interfaces/Survey';
 
 const actionCreator = actionCreatorFactory();
 
-export type AnswerQuestionPlayload = {
+export type AnswerQuestionPayload = {
   surveyId: string;
   questionIndex: number;
-  answerIndex: number;
-  answer: string;
+  inputId: string;
+  answer: any;
 };
-export const updateQuestionAnswer = actionCreator<AnswerQuestionPlayload>('UPDATE_QUESTION_ANSWER');
+export const updateQuestionAnswer = actionCreator<AnswerQuestionPayload>('UPDATE_QUESTION_ANSWER');
 
 export type LoadSurveyPayload = {
   id: string,
@@ -27,6 +27,8 @@ export const loadSurveyWorker = bindThunkAction(loadSurvey, async (options, disp
 
   if (response.status === 404) {
     throw new Error('Survey not found');
+  } else if (response.status !== 200) {
+    throw new Error(`Unknown error: ${response.status}`);
   }
 
   const survey: Survey = await response.json();
