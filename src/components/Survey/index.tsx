@@ -312,7 +312,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
   }
 
   private checkProps(props: Survey.Props) {
-    if (!props.survey && !this.props.loadError && !this.props.loading) {
+    if (!props.survey && !props.loadError && !props.loading) {
       props.loadSurvey();
     }
   }
