@@ -251,12 +251,28 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       fetch(`${apiBaseURL}/surveys/${survey.id}/results`, options)
         .then(response => {
           if (response.status !== 201) {
-            console.error(response);
+            response.json()
+              .then(json => {
+                if (json.message) {
+                  console.error('response', response);
+                  console.error('json', json);
+                  this.setState({
+                    submitting: false,
+                    submissionError: new Error(json.message),
+                  });
+                } else {
+                  throw new Error('Response was not a 201 but did not contain a message');
+                }
+              })
+              .catch(caughtError => {
+                console.error('response', response);
+                console.error('caughtError', caughtError);
+                this.setState({
+                  submitting: false,
+                  submissionError: new Error('Failed to submit survey. Please try again.'),
+                });
+              });
 
-            this.setState({
-              submitting: false,
-              submissionError: new Error('Failed to submit survey. Please try again.'),
-            });
             return;
           }
 
