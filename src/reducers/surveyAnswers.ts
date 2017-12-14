@@ -12,7 +12,7 @@ const initialState = {};
 
 const reducer = reducerWithInitialState<State>(initialState)
   .case(updateQuestionAnswer, (state, { surveyId, questionIndex, inputId, answer }) => {
-    const answers = state;
+    const answers = {...state};
 
     if (answers[surveyId] === undefined) {
       answers[surveyId] = [];
