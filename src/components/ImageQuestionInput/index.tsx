@@ -4,7 +4,7 @@ import './index.css';
 import Question from '../../interfaces/Question';
 import QuestionInputComponent from '../../interfaces/QuestionInputComponent';
 
-export default class ImageQuestionInput extends React.Component<QuestionInputComponent.Props<Question.ImagesOptions>, {}> implements QuestionInputComponent<Question.ImagesOptions> {
+export default class ImageQuestionInput extends QuestionInputComponent<Question.ImagesOptions> {
 
   public render() {
     const { images } = this.props.options;
@@ -16,12 +16,12 @@ export default class ImageQuestionInput extends React.Component<QuestionInputCom
       const handleOnClick = (event: React.MouseEvent<HTMLLabelElement>) => {
         if (event.screenX === 0 && event.screenY === 0) {
           // This event is triggered when the value is updated using the arrow
-          // keys on the keyboard while focussed on selected input. When this is
-          // the case `screen[X|Y]` are equal to 0
+          // keys on the keyboard while focussed on selected input. In this case
+          // the `onChange` handler on the `<input>` will handle the change.
           return;
         }
 
-        isChosenAnswer ? this.props.trySubmit() : this.props.updateAnswer(image.id, true, true);
+        isChosenAnswer ? this.props.trySubmit() : this.handleValueChange(image.id);
       };
 
       return (
@@ -34,7 +34,7 @@ export default class ImageQuestionInput extends React.Component<QuestionInputCom
             type="radio"
             name={inputName}
             defaultChecked={isChosenAnswer}
-            onChange={!isChosenAnswer ? () => this.props.updateAnswer(image.id, true, false) : undefined}
+            onChange={!isChosenAnswer ? () => this.handleValueChange(image.id) : undefined}
           />
           <img
             src={image.url}
@@ -49,7 +49,44 @@ export default class ImageQuestionInput extends React.Component<QuestionInputCom
     return (
       <div className="image-question-input-container">
         {elements}
+        {this.renderErrors()}
       </div>
     );
   }
+
+  public validate(input: string | undefined, forceAll: boolean) {
+    const { options } = this.props;
+    const errors: string[] = [];
+
+    function checkValueIsNotEmpty() {
+      if (options.required && (typeof input === 'undefined' || input === '')) {
+        errors.push('A value is required');
+        return false;
+      }
+
+      return true;
+    }
+
+    function checkValueIsValid() {
+      const imageIds = options.images.map(image => image.id);
+      if (typeof input !== 'undefined' && imageIds.indexOf(input) === -1) {
+        errors.push(`Selected value (${input}) is not a valid option`);
+        return false;
+      }
+
+      return true;
+    }
+
+    if (forceAll) {
+      checkValueIsNotEmpty();
+      checkValueIsValid();
+    } else {
+      if (checkValueIsNotEmpty()) {
+        checkValueIsValid();
+      }
+    }
+
+    return errors;
+  }
+
 }

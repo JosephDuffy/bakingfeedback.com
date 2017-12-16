@@ -7,6 +7,8 @@ namespace Question {
   }
 
   export interface ImagesOptions {
+    readonly required: boolean;
+
     readonly images: Array<{
 
       readonly id: string;
@@ -21,7 +23,7 @@ namespace Question {
   }
 
   export interface TextOptions {
-    readonly allowMultipleLines: boolean;
+    readonly kind: 'text' | 'textfield' | 'email';
     readonly label?: string;
     readonly placeholder?: string;
     readonly hint?: string;

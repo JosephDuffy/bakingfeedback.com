@@ -154,7 +154,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
           type: 'text',
           options: {
             label: 'Name',
-            allowMultipleLines: false,
+            kind: 'text',
             minimumCharacters: 2,
           },
         },
@@ -163,8 +163,9 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
           type: 'text',
           options: {
             label: 'Email Address',
-            allowMultipleLines: false,
-            hint: 'Will never be shown publicly; may be used in future to enable accounts',
+            kind: 'email',
+            minimumCharacters: 6,
+            hint: 'Can never be seen (gets hashed). I will not send you email. May be used in the future to enable accounts/link results',
           },
         },
       ],
@@ -181,20 +182,19 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
     }
 
     const allQuestions = survey.questions.concat(submitQuestion);
+    const formErrors = this.state.submissionError ? [`Submission error: ${this.state.submissionError.message}`] : undefined;
 
     return (
       <div id="questions-container">
-        {this.state.submissionError &&
-          <div className="form-error">{this.state.submissionError.message}</div>
-        }
         <div id="current-question-container">
           <Question
             // Key is needed to tell React that every `Question` is unique, so that
             // events from the previous question don't also happen for the next one,
-            // e.g., when answering a picture and moving to another picture question
+            // e.g., when answering am image question and moving to another image question
             key={`question-${this.currentQuestionIndex}`}
             question={question}
             answers={currentQuestionAnswers}
+            formErrors={formErrors}
             onAnswerUpdated={this.onAnswerUpdated.bind(this, this.currentQuestionIndex)}
             onSubmit={this.handleQuestionSubmit}
             nextButtonText={nextButtonText}
@@ -250,7 +250,9 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
 
       fetch(`${apiBaseURL}/surveys/${survey.id}/results`, options)
         .then(response => {
-          if (response.status !== 201) {
+          if (response.status === 201) {
+            this.props.history.push('/survey-complete');
+          } else {
             response.json()
               .then(json => {
                 if (json.message) {
@@ -272,11 +274,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
                   submissionError: new Error('Failed to submit survey. Please try again.'),
                 });
               });
-
-            return;
           }
-
-          this.props.history.push('/survey-complete');
         })
         .catch(error => {
           this.setState({
@@ -324,12 +322,20 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
   }
 
   private changeToQuestion(questionNumber: number) {
+    if (this.state.submitting) {
+      return;
+    }
+
     this.props.history.push(this.urlForQuestion(questionNumber));
   }
 
   private checkProps(props: Survey.Props) {
     if (!props.survey && !props.loadError && !props.loading) {
       props.loadSurvey();
+    } else if (props.match.params.questionNumber !== this.props.match.params.questionNumber) {
+      this.setState({
+        submissionError: undefined,
+      });
     }
   }
 }

@@ -2,6 +2,16 @@
   width: 100%;
 }
 
+.question-container .form-error {
+  background-color: #f2dede;
+  border-color: #ebcccc;
+  color: #a94442;
+  padding: .75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: .25rem;
+}
+
 .question-container .submit-button {
   float: right;
   font-weight: 400;
