@@ -31,7 +31,7 @@ export class TextQuestionInput extends QuestionInputComponent<Question.TextOptio
    * @param input The value to be validated
    * @param forceAll If `true` all rules will be run
    */
-  public validate(input: string | undefined, forceAll: boolean): string[] {
+  protected _validate(input: string | undefined, forceAll: boolean): string[] {
     const { options } = this.props;
 
     const errors: string[] = [];

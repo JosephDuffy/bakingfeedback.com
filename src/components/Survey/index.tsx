@@ -1,3 +1,4 @@
+import * as Immutable from 'immutable';
 import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
 import { Redirect, RouteComponentProps } from 'react-router';
@@ -8,6 +9,7 @@ import { loadSurveyWorker, updateQuestionAnswer } from '../../actions/surveys';
 import { apiBaseURL } from '../../config';
 import { default as QuestionInterface } from '../../interfaces/Question';
 import { default as SurveyInterface } from '../../interfaces/Survey';
+import { SurveyQuestions } from '../../reducers/surveyAnswers';
 import Question from '../Question';
 import QuestionIndicator from '../QuestionIndicator';
 
@@ -15,9 +17,7 @@ export namespace Survey {
   export type Props = Survey.DispatchProps & Survey.RouteProps;
 
   export interface DispatchProps {
-    answers: Array<{
-      [inputId: string]: string,
-    }>;
+    answers: SurveyQuestions;
     survey?: SurveyInterface;
     loadError?: Error,
     loading: boolean,
@@ -117,7 +117,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       );
     }
 
-    const { answers, survey } = this.props;
+    const {  answers, survey } = this.props;
     const { questions } = survey;
 
     if (this.currentQuestionIndex < 0) {
@@ -127,10 +127,10 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
           push={false}
         />
       );
-    } else if (this.currentQuestionIndex > answers.length) {
+    } else if (this.currentQuestionIndex > answers.count()) {
       return (
         <Redirect
-          to={this.urlForQuestion(answers.length + 1)}
+          to={this.urlForQuestion(answers.count() + 1)}
           push={false}
         />
       );
@@ -144,7 +144,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       );
     }
 
-    const currentQuestionAnswers = answers[this.currentQuestionIndex] || {};
+    const currentQuestionAnswers = answers.get(this.currentQuestionIndex) || Immutable.Map();
 
     const submitQuestion: QuestionInterface = {
       title: 'About You',
@@ -195,7 +195,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
             question={question}
             answers={currentQuestionAnswers}
             formErrors={formErrors}
-            onAnswerUpdated={this.onAnswerUpdated.bind(this, this.currentQuestionIndex)}
+            onAnswerUpdated={this.props.updateQuestionAnswer.bind(this, this.currentQuestionIndex)}
             onSubmit={this.handleQuestionSubmit}
             nextButtonText={nextButtonText}
           />
@@ -205,10 +205,6 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
         </nav>
       </div>
     );
-  }
-
-  private onAnswerUpdated(questionIndex: number, inputId: string, answer: string) {
-    this.props.updateQuestionAnswer(questionIndex, inputId, answer);
   }
 
   private handleQuestionSubmit = () => {
@@ -222,17 +218,17 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       });
 
       const { answers, survey } = this.props;
-      const lastAnswer = answers.pop();
+      const lastAnswer = answers.last();
 
       if (!lastAnswer) {
         return;
       }
 
-      const name = lastAnswer.name;
-      const email = lastAnswer.email;
+      const name = lastAnswer.get('name');
+      const email = lastAnswer.get('email');
 
       const body = JSON.stringify({
-        answers,
+        answers: answers.pop(),
         name,
         email,
         anonymous: true,
@@ -266,22 +262,13 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
                   throw new Error('Response was not a 201 but did not contain a message');
                 }
               })
-              .catch(caughtError => {
-                console.error('response', response);
-                console.error('caughtError', caughtError);
-                this.setState({
-                  submitting: false,
-                  submissionError: new Error('Failed to submit survey. Please try again.'),
-                });
-              });
+              .catch(caughtError => console.error('response', response));
           }
         })
-        .catch(error => {
-          this.setState({
+        .catch(error => this.setState({
             submitting: false,
             submissionError: error,
-          });
-        });
+          }));
     } else {
       if (this.currentQuestionIndex > -1) {
         this.changeToQuestion(this.currentQuestionIndex + 2);
@@ -298,7 +285,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       if (this.currentQuestionIndex === index) {
         style = 'current';
         enableClicking = false;
-      } else if (this.props.answers.length >= index) {
+      } else if (this.props.answers.count() >= index) {
         style = 'complete';
         enableClicking = true;
       } else {
@@ -342,16 +329,16 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
 
 const mapStateToProps = (state: AppState, ownProps: Survey.Props) => {
   return {
-    ...state.surveys.surveys[ownProps.match.params.surveyId],
-    answers: state.surveyAnswers[ownProps.match.params.surveyId] || [],
+    answers: state.surveyAnswers.get(ownProps.match.params.surveyId) || Immutable.List(),
+    survey: state.surveys.getIn(['cached', ownProps.match.params.surveyId]),
+    loadError: state.surveys.getIn(['errors', ownProps.match.params.surveyId]),
+    loading: state.surveys.get('loading').includes(ownProps.match.params.surveyId),
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<Survey>, ownProps: Survey.Props) => {
   return {
-    loadSurvey: () => {
-      dispatch(loadSurveyWorker({ id: ownProps.match.params.surveyId }));
-    },
+    loadSurvey: () => dispatch(loadSurveyWorker({ id: ownProps.match.params.surveyId })),
     updateQuestionAnswer: (questionIndex: number, inputId: string, answer: string) => {
       dispatch(updateQuestionAnswer({
         surveyId: ownProps.match.params.surveyId,

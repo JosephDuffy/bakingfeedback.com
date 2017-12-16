@@ -19,15 +19,15 @@ export class LoadLatestSurvey extends React.Component<LoadLatestSurvey.Props, {}
   }
 
   public render() {
-    if (this.props.latest) {
+    if (this.props.get('latest')) {
       return (
         <Redirect
-          to={`/${this.props.latest}/`}
+          to={`/${this.props.get('latest')}/`}
           push={false}
         />
       );
-    } else if (this.props.surveys.latest && this.props.surveys.latest.loadError) {
-      const error = this.props.surveys.latest.loadError;
+    } else if (this.props.get('surveys').get('latest') && this.props.get('surveys').get('latest').loadError) {
+      const error = this.props.get('surveys').get('latest').loadError as Error;
 
       return (
         <div>

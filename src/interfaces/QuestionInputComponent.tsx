@@ -4,7 +4,7 @@ import Question from './Question';
 
 namespace QuestionInputComponent {
   export interface Props<QuestionOptions extends Question.Options> {
-    answer?: string;
+    answer?: any;
     options: QuestionOptions;
     updateAnswer: (answer: string) => void;
     trySubmit: () => void;
@@ -25,7 +25,20 @@ abstract class QuestionInputComponent<QuestionOptions extends Question.Options> 
     };
   }
 
-  public abstract validate(input: string | undefined, forceAll: boolean): string[];
+  public validate(input: string | undefined, forceAll: boolean, updateState?: (() => void) | true): string[] {
+    const errors = this._validate(input, forceAll);
+
+    if (updateState) {
+      const callback = updateState !== true ? updateState : undefined;
+      this.setState({
+        errors,
+      }, callback);
+    }
+
+    return errors;
+  }
+
+  protected abstract _validate(input: string | undefined, forceAll: boolean): string[];
 
   protected renderErrors() {
     if (this.state.errors.length > 0) {
@@ -40,13 +53,9 @@ abstract class QuestionInputComponent<QuestionOptions extends Question.Options> 
   }
 
   protected handleValueChange(value: string) {
-    const errors = this.validate(value, false);
-
-    this.setState({
-      errors,
+    this.validate(value, false, () => {
+      this.props.updateAnswer(value);
     });
-
-    this.props.updateAnswer(value);
   }
 
 }

@@ -54,7 +54,7 @@ export default class ImageQuestionInput extends QuestionInputComponent<Question.
     );
   }
 
-  public validate(input: string | undefined, forceAll: boolean) {
+  protected _validate(input: string | undefined, forceAll: boolean) {
     const { options } = this.props;
     const errors: string[] = [];
 

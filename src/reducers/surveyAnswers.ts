@@ -1,28 +1,27 @@
+import * as Immutable from 'immutable';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { updateQuestionAnswer } from '../actions/surveys';
 
-export type State = {
-  [surveyId: string]: Array<{
-    [inputId: string]: any,
-  }>,
-};
+export type QuestionAnswers = Immutable.Map<string, any>;
+export type SurveyQuestions = Immutable.List<QuestionAnswers>;
+export type State = Immutable.Map<string, SurveyQuestions>;
 
-const initialState = {};
+const initialState = Immutable.Map<string, SurveyQuestions>();
 
 const reducer = reducerWithInitialState<State>(initialState)
   .case(updateQuestionAnswer, (state, { surveyId, questionIndex, inputId, answer }) => {
-    const answers = {...state};
+    let answers = state;
 
-    if (answers[surveyId] === undefined) {
-      answers[surveyId] = [];
+    if (answers.get(surveyId) === undefined) {
+      answers = answers.set(surveyId, Immutable.List());
     }
 
-    if (answers[surveyId][questionIndex] === undefined) {
-      answers[surveyId][questionIndex] = {};
+    if (answers.getIn([surveyId, questionIndex]) === undefined) {
+      answers = answers.setIn([surveyId, questionIndex], Immutable.Map());
     }
 
-    answers[surveyId][questionIndex][inputId] = answer;
+    answers = answers.setIn([surveyId, questionIndex, inputId], answer);
 
     return answers;
   })

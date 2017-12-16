@@ -1,6 +1,7 @@
 import * as localForage from 'localforage';
 import { combineReducers } from 'redux';
 import { persistReducer } from 'redux-persist';
+import immutableTransform from 'redux-persist-transform-immutable';
 
 import surveyAnswers, { State as SurveysAnswersState } from './surveyAnswers';
 import { default as surveysReducer, State as SurveysState } from './surveys';
@@ -20,6 +21,7 @@ const combinedReducers = combineReducers<AppState>({
 const config = {
   key: 'app',
   storage: localForage,
+  transforms: [immutableTransform()],
 };
 
 export default persistReducer(config, combinedReducers);

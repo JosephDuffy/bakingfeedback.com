@@ -3,6 +3,7 @@ import './index.css';
 
 import { default as QuestionInterface } from '../../interfaces/Question';
 import QuestionInputComponent from '../../interfaces/QuestionInputComponent';
+import { QuestionAnswers } from '../../reducers/surveyAnswers';
 
 import ImageQuestionInput from '../ImageQuestionInput';
 import TextQuestionInput from '../TextQuestionInput';
@@ -10,9 +11,7 @@ import TextQuestionInput from '../TextQuestionInput';
 namespace Question {
   export interface Props {
     question: QuestionInterface;
-    answers: {
-      [inputId: string]: string;
-    };
+    answers: QuestionAnswers;
     /// Will default to "Next"
     nextButtonText?: string;
     formErrors?: string[];
@@ -49,7 +48,7 @@ class Question extends React.Component<Question.Props, Question.State> {
     const { formErrors, question } = this.props;
 
     const inputs = question.inputs.map(input => {
-      const answer = this.props.answers[input.id];
+      const answer = this.props.answers.get(input.id);
 
       switch (input.type) {
         case 'images':
@@ -119,20 +118,19 @@ class Question extends React.Component<Question.Props, Question.State> {
   }
 
   private validateAllAnswers(): { [inputId: string]: string[]; } {
-    const { answers } = this.props;
+    const { answers, question } = this.props;
     const allErrors: {
       [inputId: string]: string[];
     } = {};
 
-    // `Array.from` is a hack: https://github.com/Microsoft/TypeScript/issues/11209#issuecomment-303152976
-    for (const inputId of Array.from(Object.keys(answers))) {
-      const answer = answers[inputId];
-      const component = this.inputElements[inputId];
-      const errors = component.validate(answer, true);
+    question.inputs.forEach(input => {
+      const component = this.inputElements[input.id];
+      const answer = answers.get(input.id);
+      const errors = component.validate(answer, true, true);
       if (errors.length > 0) {
-        allErrors[inputId] = errors;
+        allErrors[input.id] = errors;
       }
-    }
+    });
 
     return allErrors;
   }
