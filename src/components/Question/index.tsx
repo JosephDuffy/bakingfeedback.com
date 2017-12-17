@@ -5,6 +5,7 @@ import { default as QuestionInterface } from '../../interfaces/Question';
 import QuestionInputComponent from '../../interfaces/QuestionInputComponent';
 import { QuestionAnswers } from '../../reducers/surveyAnswers';
 
+import CheckboxQuestionInput from '../CheckboxQuestionInput';
 import ImageQuestionInput from '../ImageQuestionInput';
 import TextQuestionInput from '../TextQuestionInput';
 
@@ -33,8 +34,12 @@ namespace Question {
 class Question extends React.Component<Question.Props, Question.State> {
 
   private inputElements: {
-    [inputId: string]: QuestionInputComponent<any>,
+    [inputId: string]: QuestionInputComponent<any, any>,
   } = {};
+
+  private get flattenedInputs(): QuestionInterface.Input[] {
+    return new Array<QuestionInterface.Input>().concat(...this.props.question.inputs);
+  }
 
   constructor(props: Question.Props) {
     super(props);
@@ -47,15 +52,27 @@ class Question extends React.Component<Question.Props, Question.State> {
   public render() {
     const { formErrors, question } = this.props;
 
-    const inputs = question.inputs.map(input => {
-      const answer = this.props.answers.get(input.id);
+    const convertInputsToComponent = (inputs: QuestionInterface.Input[] | QuestionInterface.Input): JSX.Element => {
+      if (Array.isArray(inputs)) {
+        return (
+          <div
+            key={`form-group-${inputs.map(input => input.id).join('-')}`}
+            className="form-group"
+          >
+            {inputs.map(convertInputsToComponent)}
+          </div>
+        );
+      } else {
+        const input = inputs;
+        const answer = this.props.answers.get(input.id);
 
-      switch (input.type) {
+        switch (input.type) {
         case 'images':
           return (
             <ImageQuestionInput
               key={input.id}
               ref={instance => this.inputElements[input.id] = instance as any}
+              className="question-container"
               answer={answer}
               options={input.options as QuestionInterface.ImagesOptions}
               updateAnswer={this.handleAnswerUpdated.bind(this, input.id)}
@@ -67,16 +84,36 @@ class Question extends React.Component<Question.Props, Question.State> {
             <TextQuestionInput
               key={input.id}
               ref={instance => this.inputElements[input.id] = instance as any}
+              className="question-container"
               answer={answer}
               options={input.options as QuestionInterface.TextOptions}
               updateAnswer={this.handleAnswerUpdated.bind(this, input.id)}
               trySubmit={this.trySubmit.bind(this)}
             />
           );
+        case 'checkbox':
+          return (
+            <CheckboxQuestionInput
+              key={input.id}
+              ref={instance => this.inputElements[input.id] = instance as any}
+              className="question-container"
+              answer={answer}
+              options={input.options as QuestionInterface.CheckboxOptions}
+              updateAnswer={this.handleAnswerUpdated.bind(this, input.id)}
+              trySubmit={this.trySubmit.bind(this)}
+            />
+          );
+        default:
+          throw new Error(`Invalid input type ${input.type}`);
+        }
       }
-    });
+    };
 
-    const renderSubmitButton = question.inputs.length > 1 || question.inputs[0].type !== 'images';
+    const inputsComponent = question.inputs.map(convertInputsToComponent);
+
+    const hasMoreThan1Input = question.inputs.length > 1;
+    const firstInputIsImage = this.flattenedInputs[0].type !== 'images';
+    const renderSubmitButton = hasMoreThan1Input || firstInputIsImage;
 
     return (
       <div className="question-container">
@@ -90,9 +127,8 @@ class Question extends React.Component<Question.Props, Question.State> {
           className="question-form"
           onSubmit={event => { this.trySubmit(); event.preventDefault(); return false; }}
         >
-          {inputs}
+          {inputsComponent}
           <button
-            type="button"
             className="submit-button"
             onClick={this.trySubmit}
             hidden={!renderSubmitButton ? true : undefined}
@@ -112,18 +148,18 @@ class Question extends React.Component<Question.Props, Question.State> {
   private handleAnswerUpdated(inputId: string, answer: string) {
     this.props.onAnswerUpdated(inputId, answer);
 
-    if (answer !== '' && this.props.question.inputs.length === 1 && this.props.question.inputs[0].type === 'images') {
+    if (answer !== '' && this.flattenedInputs.length === 1 && this.flattenedInputs[0].type === 'images') {
       this.trySubmit();
     }
   }
 
   private validateAllAnswers(): { [inputId: string]: string[]; } {
-    const { answers, question } = this.props;
+    const { answers } = this.props;
     const allErrors: {
       [inputId: string]: string[];
     } = {};
 
-    question.inputs.forEach(input => {
+    this.flattenedInputs.forEach(input => {
       const component = this.inputElements[input.id];
       const answer = answers.get(input.id);
       const errors = component.validate(answer, true, true);

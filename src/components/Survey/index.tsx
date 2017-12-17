@@ -149,15 +149,29 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
     const submitQuestion: QuestionInterface = {
       title: 'About You',
       inputs: [
-        {
-          id: 'name',
-          type: 'text',
-          options: {
-            label: 'Name',
-            kind: 'text',
-            minimumCharacters: 2,
+        [
+          {
+            id: 'name',
+            type: 'text',
+            options: {
+              label: 'Name',
+              kind: 'text',
+              minimumCharacters: 2,
+              autoCapitalize: 'words',
+            },
           },
-        },
+          {
+            id: 'showName',
+            type: 'checkbox',
+            options: {
+              label: 'Show publicly',
+              required: false,
+              defaultValue: false,
+              checkedHint: 'Uncheck to be shown as "Anonymous" on results',
+              uncheckedHint: 'Leave unchecked to be shown as "Anonymous" on results',
+            },
+          },
+        ],
         {
           id: 'email',
           type: 'text',
@@ -226,12 +240,13 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
 
       const name = lastAnswer.get('name');
       const email = lastAnswer.get('email');
+      const showName = lastAnswer.get('showName');
 
       const body = JSON.stringify({
         answers: answers.pop(),
         name,
         email,
-        anonymous: true,
+        showName,
       });
 
       const options = {
@@ -242,6 +257,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
 
       this.setState({
         submitting: true,
+        submissionError: undefined,
       });
 
       fetch(`${apiBaseURL}/surveys/${survey.id}/results`, options)

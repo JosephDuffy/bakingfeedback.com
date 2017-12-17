@@ -2,9 +2,8 @@
   margin-bottom: 1rem;
 }
 
-.text-question-container small {
-  opacity: 0.8;
-  display: block;
+.form-group .text-question-container {
+  margin-bottom: 0;
 }
 
 .text-question-container input, .text-question-container textarea {

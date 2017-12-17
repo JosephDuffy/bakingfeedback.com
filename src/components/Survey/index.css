@@ -1,11 +1,13 @@
 #questions-container {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
 
 #current-question-container {
-  width: 100%
+  width: 100%;
 }
 
 #current-question-container h1 {

@@ -8,6 +8,7 @@ import { State as SurveysState } from '../../reducers/surveys';
 export namespace LoadLatestSurvey {
 
   export interface Props extends SurveysState {
+    surveys: SurveysState;
     loadSurvey(id: string): void;
   }
 }
@@ -19,15 +20,15 @@ export class LoadLatestSurvey extends React.Component<LoadLatestSurvey.Props, {}
   }
 
   public render() {
-    if (this.props.get('latest')) {
-      return (
+    if (typeof this.props.surveys.get('latest') === 'string') {
+    return (
         <Redirect
-          to={`/${this.props.get('latest')}/`}
+          to={`/${this.props.surveys.get('latest')}/`}
           push={false}
         />
       );
-    } else if (this.props.get('surveys').get('latest') && this.props.get('surveys').get('latest').loadError) {
-      const error = this.props.get('surveys').get('latest').loadError as Error;
+    } else if (this.props.surveys.get('errors').get('latest')) {
+      const error = this.props.surveys.get('errors').get('latest') as Error;
 
       return (
         <div>
@@ -46,7 +47,7 @@ export class LoadLatestSurvey extends React.Component<LoadLatestSurvey.Props, {}
 
 const mapStateToProps = (state: AppState) => {
   return {
-    ...state.surveys,
+    surveys: state.surveys,
   };
 };
 

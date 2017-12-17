@@ -1,0 +1,12 @@
+.checkbox-question-input-container {
+  margin-top: 0.2rem;
+}
+
+.checkbox-question-input-container label {
+  margin-bottom: 0;
+  font-size: 0.8rem;
+}
+
+.checkbox-question-input-container input[type=checkbox] {
+  margin: 0 0.3rem
+}

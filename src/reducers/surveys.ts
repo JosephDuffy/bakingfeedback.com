@@ -5,7 +5,7 @@ import { loadSurvey } from '../actions/surveys';
 import Survey from '../interfaces/Survey';
 
 const StateRecord = Immutable.Record({
-  latest: 'null',
+  latest: null,
   cached: Immutable.Map<string, Survey>(),
   errors: Immutable.Map<string, Error>(),
   loading: Immutable.Set<string>(),

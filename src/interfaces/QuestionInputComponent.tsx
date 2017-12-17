@@ -3,10 +3,11 @@ import * as React from 'react';
 import Question from './Question';
 
 namespace QuestionInputComponent {
-  export interface Props<QuestionOptions extends Question.Options> {
+  export interface Props<QuestionOptions extends Question.Options, InputType> {
     answer?: any;
     options: QuestionOptions;
-    updateAnswer: (answer: string) => void;
+    className?: string;
+    updateAnswer: (answer: InputType) => void;
     trySubmit: () => void;
   }
 
@@ -15,9 +16,9 @@ namespace QuestionInputComponent {
   }
 }
 
-abstract class QuestionInputComponent<QuestionOptions extends Question.Options> extends React.Component<QuestionInputComponent.Props<QuestionOptions>, QuestionInputComponent.State> {
+abstract class QuestionInputComponent<QuestionOptions extends Question.Options, InputType> extends React.Component<QuestionInputComponent.Props<QuestionOptions, InputType>, QuestionInputComponent.State> {
 
-  constructor(props: QuestionInputComponent.Props<QuestionOptions>) {
+  constructor(props: QuestionInputComponent.Props<QuestionOptions, InputType>) {
     super(props);
 
     this.state = {
@@ -25,7 +26,7 @@ abstract class QuestionInputComponent<QuestionOptions extends Question.Options> 
     };
   }
 
-  public validate(input: string | undefined, forceAll: boolean, updateState?: (() => void) | true): string[] {
+  public validate(input: InputType | undefined, forceAll: boolean, updateState?: (() => void) | true): string[] {
     const errors = this._validate(input, forceAll);
 
     if (updateState) {
@@ -38,7 +39,7 @@ abstract class QuestionInputComponent<QuestionOptions extends Question.Options> 
     return errors;
   }
 
-  protected abstract _validate(input: string | undefined, forceAll: boolean): string[];
+  protected abstract _validate(input: InputType | undefined, forceAll: boolean): string[];
 
   protected renderErrors() {
     if (this.state.errors.length > 0) {
@@ -52,7 +53,15 @@ abstract class QuestionInputComponent<QuestionOptions extends Question.Options> 
     }
   }
 
-  protected handleValueChange(value: string) {
+  protected renderHint(hint: string | undefined = this.props.options.hint) {
+    if (hint) {
+      return <small className="hint">{hint}</small>;
+    } else {
+      return undefined;
+    }
+  }
+
+  protected handleValueChange(value: InputType) {
     this.validate(value, false, () => {
       this.props.updateAnswer(value);
     });

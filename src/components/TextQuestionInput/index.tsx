@@ -5,7 +5,7 @@ import './index.css';
 import Question from '../../interfaces/Question';
 import QuestionInputComponent from '../../interfaces/QuestionInputComponent';
 
-export class TextQuestionInput extends QuestionInputComponent<Question.TextOptions> {
+export class TextQuestionInput extends QuestionInputComponent<Question.TextOptions, string> {
 
   public render() {
     const { options } = this.props;
@@ -72,10 +72,11 @@ export class TextQuestionInput extends QuestionInputComponent<Question.TextOptio
 
   private renderTextField() {
     return (
-      <div className="text-field-container text-question-container">
+      <div className={['text-field-container text-question-container', this.props.className].filter(value => !!value).join(' ')}>
         {this.renderLabel()}
         <textarea
-          value={this.props.answer || ''}
+          defaultValue={this.props.answer || ''}
+          autoCapitalize={this.props.options.autoCapitalize}
           onChange={this.handleChange}
           onSubmit={this.handleSubmit}
         />
@@ -87,11 +88,12 @@ export class TextQuestionInput extends QuestionInputComponent<Question.TextOptio
 
   private renderTextInput() {
     return (
-      <div className="text-input-container text-question-container">
+      <div className={['text-input-container text-question-container', this.props.className].filter(value => !!value).join(' ')}>
         {this.renderLabel()}
         <input
-          type="text"
-          value={this.props.answer || ''}
+          type={this.props.options.kind}
+          defaultValue={this.props.answer || ''}
+          autoCapitalize={this.props.options.autoCapitalize}
           onChange={this.handleChange}
           onSubmit={this.handleSubmit}
         />
@@ -104,14 +106,6 @@ export class TextQuestionInput extends QuestionInputComponent<Question.TextOptio
   private renderLabel() {
     if (this.props.options.label) {
       return <label>{this.props.options.label}</label>;
-    } else {
-      return undefined;
-    }
-  }
-
-  private renderHint() {
-    if (this.props.options.hint) {
-      return <small className="tip">{this.props.options.hint}</small>;
     } else {
       return undefined;
     }

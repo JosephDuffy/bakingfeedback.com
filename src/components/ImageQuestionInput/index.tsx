@@ -4,7 +4,7 @@ import './index.css';
 import Question from '../../interfaces/Question';
 import QuestionInputComponent from '../../interfaces/QuestionInputComponent';
 
-export default class ImageQuestionInput extends QuestionInputComponent<Question.ImagesOptions> {
+export default class ImageQuestionInput extends QuestionInputComponent<Question.ImagesOptions, string> {
 
   public render() {
     const { images } = this.props.options;
@@ -47,7 +47,7 @@ export default class ImageQuestionInput extends QuestionInputComponent<Question.
     });
 
     return (
-      <div className="image-question-input-container">
+      <div className={['image-question-input-container', this.props.className].filter(value => !!value).join(' ')}>
         {elements}
         {this.renderErrors()}
       </div>

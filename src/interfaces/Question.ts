@@ -2,12 +2,13 @@
 namespace Question {
   export interface Input {
     readonly id: string;
-    readonly type: 'images' | 'text';
+    readonly type: 'images' | 'text' | 'checkbox';
     readonly options: Options;
   }
 
   export interface ImagesOptions {
     readonly required: boolean;
+    readonly hint?: string;
 
     readonly images: Array<{
 
@@ -22,6 +23,15 @@ namespace Question {
     }>;
   }
 
+  export interface CheckboxOptions {
+    readonly required: boolean;
+    readonly label: string;
+    readonly defaultValue: boolean;
+    readonly hint?: string;
+    readonly checkedHint?: string;
+    readonly uncheckedHint?: string;
+  }
+
   export interface TextOptions {
     readonly kind: 'text' | 'textfield' | 'email';
     readonly label?: string;
@@ -29,16 +39,17 @@ namespace Question {
     readonly hint?: string;
     readonly minimumCharacters?: number;
     readonly maximumCharacters?: number;
+    readonly autoCapitalize?: 'characters' | 'words' | 'sentences';
   }
 
-  export type Options = ImagesOptions | TextOptions;
+  export type Options = ImagesOptions | TextOptions | CheckboxOptions;
 }
 
 interface Question {
 
   readonly title?: string;
 
-  readonly inputs: Question.Input[];
+  readonly inputs: Array<Question.Input[] | Question.Input>;
 
 }
 
