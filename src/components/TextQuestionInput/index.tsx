@@ -1,5 +1,5 @@
-import * as isemail from 'isemail';
 import * as React from 'react';
+import * as isEmail from 'validator/lib/isEmail';
 import './index.css';
 
 import Question from '../../interfaces/Question';
@@ -47,7 +47,7 @@ export class TextQuestionInput extends QuestionInputComponent<Question.TextOptio
     }
 
     function checkIsEmail() {
-      if (options.kind === 'email' && (typeof input === 'undefined' || !isemail.validate(input))) {
+      if (options.kind === 'email' && (typeof input === 'undefined' || !isEmail(input))) {
         errors.push('Value must be a valid email');
 
         return false;
