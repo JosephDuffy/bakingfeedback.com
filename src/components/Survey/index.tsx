@@ -252,8 +252,6 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
             response.json()
               .then(json => {
                 if (json.message) {
-                  console.error('response', response);
-                  console.error('json', json);
                   this.setState({
                     submitting: false,
                     submissionError: new Error(json.message),
