@@ -5,7 +5,6 @@ import { loadSurvey } from '../actions/surveys';
 import Survey from '../interfaces/Survey';
 
 const StateRecord = Immutable.Record({
-  latest: null,
   cached: Immutable.Map<string, Survey>(),
   errors: Immutable.Map<string, Error>(),
   loading: Immutable.Set<string>(),
@@ -24,10 +23,6 @@ const reducer = reducerWithInitialState<State>(new StateRecord())
   })
   .case(loadSurvey.done, (state, payload) => {
     let newState = state;
-
-    if (payload.params.id === 'latest') {
-      newState = newState.set('latest', payload.result.id);
-    }
 
     newState = newState.update('loading', loading => loading.remove(payload.params.id));
     newState = newState.deleteIn(['errors', payload.params.id]);

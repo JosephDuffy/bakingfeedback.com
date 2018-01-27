@@ -10,7 +10,7 @@ namespace QuestionIndicator {
     href?: string;
   }
 
-  export type Style = 'locked' | 'current' | 'complete';
+  export type Style = 'locked' | 'unlocked' | 'current' | 'complete';
 
   export interface State {
     transitionState: TransitionState;

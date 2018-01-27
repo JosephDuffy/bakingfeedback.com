@@ -41,11 +41,19 @@ export namespace Survey {
 export class Survey extends React.Component<Survey.Props, Survey.State> {
 
   private get currentQuestionIndex() {
-    if (this.props.match.params.questionNumber === undefined) {
+    if (this.currentStageIndex === 0) {
       return -1;
     }
 
-    return Number.parseInt(this.props.match.params.questionNumber, 10) - 1;
+    return this.currentStageIndex - 1;
+  }
+
+  private get currentStageIndex() {
+    if (this.props.match.params.questionNumber === undefined) {
+      return 0;
+    }
+
+    return Number.parseInt(this.props.match.params.questionNumber, 10);
   }
 
   private get lastQuestionNumberUnlocked() {
@@ -108,43 +116,28 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       return (
         <div>🤯🤯🤯</div>
       );
-    } else if (!this.props.match.params.questionNumber) {
-      return (
-        <Redirect
-          to={this.urlForQuestion(1)}
-          push={false}
-        />
-      );
     }
 
-    const {  answers, survey } = this.props;
+    const { answers, survey } = this.props;
     const { questions } = survey;
+    const { questionNumber } = this.props.match.params;
 
-    if (this.currentQuestionIndex < 0) {
+    if (this.currentQuestionIndex > answers.count() && !this.isOnSubmit) {
       return (
         <Redirect
-          to={this.urlForQuestion(1)}
+          to={this.urlForStage(answers.count())}
           push={false}
         />
       );
-    } else if (this.currentQuestionIndex > answers.count()) {
-      return (
-        <Redirect
-          to={this.urlForQuestion(answers.count() + 1)}
-          push={false}
-        />
-      );
-    } else if (`${this.currentQuestionIndex + 1}` !== this.props.match.params.questionNumber) {
+    } else if (questionNumber !== undefined && `${this.currentQuestionIndex + 1}` !== questionNumber) {
       // `Number.parseInt` will happily parse `1-and-lots-more` as `1`
       return (
         <Redirect
-          to={this.urlForQuestion(this.currentQuestionIndex + 1)}
+          to={this.urlForStage(this.currentStageIndex)}
           push={false}
         />
       );
     }
-
-    const currentQuestionAnswers = answers.get(this.currentQuestionIndex) || Immutable.Map();
 
     const submitQuestion: QuestionInterface = {
       title: 'About You',
@@ -185,21 +178,37 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       ],
     };
 
-    let question: QuestionInterface;
-    let nextButtonText: string | undefined;
+    let contentComponent: JSX.Element;
 
-    if (this.isOnSubmit) {
-      question = submitQuestion;
-      nextButtonText = 'Submit';
+    if (questionNumber === undefined) {
+      contentComponent = (
+        <div id="current-question-container">
+          <h1>{survey.introTitle}</h1>
+          <div dangerouslySetInnerHTML={{__html: survey.introDescription}} />
+          <button
+            className="submit-button"
+            onClick={ () => this.changeToStage(1) }
+          >
+           Let's go!
+          </button>
+        </div>
+      );
     } else {
-      question = questions[this.currentQuestionIndex];
-    }
 
-    const allQuestions = survey.questions.concat(submitQuestion);
-    const formErrors = this.state.submissionError ? [`Submission error: ${this.state.submissionError.message}`] : undefined;
+      const currentQuestionAnswers = answers.get(this.currentQuestionIndex) || Immutable.Map();
 
-    return (
-      <div id="questions-container">
+      let question: QuestionInterface;
+      let nextButtonText: string | undefined;
+
+      if (this.isOnSubmit) {
+        question = submitQuestion;
+        nextButtonText = 'Submit';
+      } else {
+        question = questions[this.currentQuestionIndex];
+      }
+      const formErrors = this.state.submissionError ? [`Submission error: ${this.state.submissionError.message}`] : undefined;
+
+      contentComponent = (
         <div id="current-question-container">
           <Question
             // Key is needed to tell React that every `Question` is unique, so that
@@ -214,8 +223,20 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
             nextButtonText={nextButtonText}
           />
         </div>
+      );
+    }
+
+    const stageTitles = [
+      'Intro',
+      ...questions.map((question, index) => `Question ${index + 1}`),
+      'Submit',
+    ];
+
+    return (
+      <div id="questions-container">
+        {contentComponent}
         <nav id="question-indicators-container">
-          {this.questionIndicators(allQuestions)}
+          {this.stageIndicators(stageTitles)}
         </nav>
       </div>
     );
@@ -243,7 +264,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       const showName = lastAnswer.get('showName');
 
       const body = JSON.stringify({
-        answers: answers.pop(),
+        answers: answers.pop().map(answer => answer === null ? '' : answer),
         name,
         email,
         showName,
@@ -268,6 +289,8 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
             response.json()
               .then(json => {
                 if (json.message) {
+                  console.error(json);
+
                   this.setState({
                     submitting: false,
                     submissionError: new Error(json.message),
@@ -285,21 +308,23 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
           }));
     } else {
       if (this.currentQuestionIndex > -1) {
-        this.changeToQuestion(this.currentQuestionIndex + 2);
+        this.changeToStage(this.currentStageIndex + 1);
       }
     }
   }
 
-  private questionIndicators(allQuestions: QuestionInterface[]) {
-    return allQuestions.map((question, index) => {
-      const questionNumber = index + 1;
+  private stageIndicators(titles: string[]) {
+    return titles.map((title, index) => {
       let style: QuestionIndicator.Style;
       let enableClicking: boolean;
 
-      if (this.currentQuestionIndex === index) {
+      if (this.currentStageIndex === index) {
         style = 'current';
         enableClicking = false;
-      } else if (this.props.answers.count() >= index) {
+      } else if (index === 1 && this.currentStageIndex === 0) {
+        style = 'unlocked';
+        enableClicking = true;
+      } else if (this.props.answers.count() >= index - 1) {
         style = 'complete';
         enableClicking = true;
       } else {
@@ -310,24 +335,28 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       return (
         <QuestionIndicator
           key={index}
-          text={`Question ${questionNumber}`}
+          text={title}
           style={style}
-          href={enableClicking ? this.urlForQuestion(questionNumber) : undefined}
+          href={enableClicking ? this.urlForStage(index) : undefined}
         />
       );
     });
   }
 
-  private urlForQuestion(questionNumber: number) {
-    return `/${this.props.match.params.surveyId}/question-${questionNumber}`;
+  private urlForStage(stageIndex: number) {
+    if (stageIndex === 0) {
+      return `/${this.props.match.params.surveyId}/`;
+    } else {
+      return `/${this.props.match.params.surveyId}/question-${stageIndex}`;
+    }
   }
 
-  private changeToQuestion(questionNumber: number) {
+  private changeToStage(stageIndex: number) {
     if (this.state.submitting) {
       return;
     }
 
-    this.props.history.push(this.urlForQuestion(questionNumber));
+    this.props.history.push(this.urlForStage(stageIndex));
   }
 
   private checkProps(props: Survey.Props) {

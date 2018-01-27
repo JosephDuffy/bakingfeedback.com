@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
 import { Redirect } from 'react-router';
-import { loadSurveyWorker } from '../../actions/surveys';
+import { Action, Success } from 'typescript-fsa';
+import { LoadSurveyPayload, loadSurveyWorker } from '../../actions/surveys';
+import Survey from '../../interfaces/Survey';
 import { AppState } from '../../reducers';
 import { State as SurveysState } from '../../reducers/surveys';
 
@@ -9,21 +11,36 @@ export namespace LoadLatestSurvey {
 
   export interface Props extends SurveysState {
     surveys: SurveysState;
-    loadSurvey(id: string): void;
+    loadSurvey(id: string): Promise<Action<Success<LoadSurveyPayload, Survey>>>;
   }
+
+  export interface State {
+    latestSurvey?: Survey;
+  }
+
 }
 
-export class LoadLatestSurvey extends React.Component<LoadLatestSurvey.Props, {}> {
+export class LoadLatestSurvey extends React.Component<LoadLatestSurvey.Props, LoadLatestSurvey.State> {
+
+  constructor(props: LoadLatestSurvey.Props) {
+    super(props);
+
+    this.state = {};
+  }
 
   public componentWillMount() {
-    this.props.loadSurvey('latest');
+    this.props.loadSurvey('latest').then(latestSurvey => {
+      this.setState({
+        latestSurvey: latestSurvey.payload.result,
+      });
+    });
   }
 
   public render() {
-    if (typeof this.props.surveys.get('latest') === 'string') {
-    return (
+    if (this.state.latestSurvey) {
+      return (
         <Redirect
-          to={`/${this.props.surveys.get('latest')}/`}
+          to={`/${this.state.latestSurvey.id}/`}
           push={false}
         />
       );
@@ -54,7 +71,7 @@ const mapStateToProps = (state: AppState) => {
 const mapDispatchToProps = (dispatch: Dispatch<LoadLatestSurvey>) => {
   return {
     loadSurvey: (id: string) => {
-      dispatch(loadSurveyWorker({ id }));
+      return dispatch(loadSurveyWorker({ id }));
     },
   };
 };
