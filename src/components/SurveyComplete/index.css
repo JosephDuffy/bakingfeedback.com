@@ -1,3 +1,13 @@
 .survey-complete-container {
   text-align: center;
 }
+
+.survey-complete-container a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.survey-complete-container a:hover, .survey-complete-container a:active {
+  text-decoration: underline;
+  color: white;
+}

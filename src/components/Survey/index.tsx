@@ -284,7 +284,7 @@ export class Survey extends React.Component<Survey.Props, Survey.State> {
       fetch(`${apiBaseURL}/surveys/${survey.id}/results`, options)
         .then(response => {
           if (response.status === 201) {
-            this.props.history.push('/survey-complete');
+            this.props.history.push(`/${this.props.match.params.surveyId}/completed`);
           } else {
             response.json()
               .then(json => {

@@ -16,7 +16,7 @@ namespace QuestionInputComponent {
   }
 }
 
-abstract class QuestionInputComponent<QuestionOptions extends Question.Options, InputType> extends React.Component<QuestionInputComponent.Props<QuestionOptions, InputType>, QuestionInputComponent.State> {
+abstract class QuestionInputComponent<QuestionOptions extends Question.Options, InputType extends string | boolean> extends React.Component<QuestionInputComponent.Props<QuestionOptions, InputType>, QuestionInputComponent.State> {
 
   constructor(props: QuestionInputComponent.Props<QuestionOptions, InputType>) {
     super(props);

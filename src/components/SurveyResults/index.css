@@ -1,0 +1,19 @@
+.image-question-answer-image {
+  width: 100px;
+  height: 100px;
+}
+
+.result-questions-container {
+  padding-bottom: 2em;
+}
+
+.result-container time {
+  font-size: 0.6em;
+  margin-top: -1em;
+  margin-bottom: 1em;
+  display: flex;
+}
+
+.result-question-container {
+  margin-bottom: 0.5em;
+}

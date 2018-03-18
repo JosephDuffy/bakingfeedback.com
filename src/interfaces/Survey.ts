@@ -4,6 +4,8 @@ export default interface Survey {
 
   readonly id: string;
 
+  readonly foodName: string;
+
   readonly introTitle: string;
 
   readonly introDescription: string;

@@ -7,7 +7,7 @@ export type QuestionAnswers = Immutable.Map<string, any>;
 export type SurveyQuestions = Immutable.List<QuestionAnswers>;
 export type State = Immutable.Map<string, SurveyQuestions>;
 
-const initialState = Immutable.Map<string, SurveyQuestions>();
+const initialState: State = Immutable.Map();
 
 const reducer = reducerWithInitialState<State>(initialState)
   .case(updateQuestionAnswer, (state, { surveyId, questionIndex, inputId, answer }) => {

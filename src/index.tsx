@@ -12,6 +12,7 @@ import Footer from './components/Footer';
 import LoadLatestSurvey from './components/LoadLatestSurvey';
 import Survey from './components/Survey';
 import SurveyComplete from './components/SurveyComplete';
+import SurveyResults from './components/SurveyResults';
 
 import registerServiceWorker from './registerServiceWorker';
 import { configureStore } from './store';
@@ -32,9 +33,10 @@ ReactDOM.render(
           <Switch>
             <Route path="/" exact={true} component={LoadLatestSurvey} />
             <Route path="/latest-survey" exact={true} component={LoadLatestSurvey} />
-            <Route path="/survey-complete" exact={true} component={SurveyComplete} />
             <Route path="/:surveyId/" exact={true} component={Survey} />
             <Route path="/:surveyId/question-:questionNumber" exact={true} component={Survey} />
+            <Route path="/:surveyId/results" exact={true} component={SurveyResults} />
+            <Route path="/:surveyId/completed" exact={true} component={SurveyComplete} />
           </Switch>
         </Router>
       </main>
